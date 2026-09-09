@@ -1,8 +1,35 @@
 import sys
 import os
+import subprocess
 
 # Add project root directory to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# Check and auto-import or prompt for required dependencies
+REQUIRED_PACKAGES = {
+    "sqlalchemy": "sqlalchemy",
+    "pymysql": "pymysql",
+    "dotenv": "python-dotenv",
+    "cryptography": "cryptography"
+}
+
+missing_packages = []
+for module_name, pip_name in REQUIRED_PACKAGES.items():
+    try:
+        __import__(module_name)
+    except ImportError:
+        missing_packages.append(pip_name)
+
+if missing_packages:
+    print(f"[!] Missing required libraries: {', '.join(missing_packages)}")
+    print("[*] Installing missing dependencies automatically...")
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install"] + missing_packages)
+        print("[✓] Dependencies installed successfully!\n")
+    except Exception as e:
+        print(f"[X] Auto-install failed. Please run manually:")
+        print(f"    pip install {' '.join(missing_packages)}")
+        sys.exit(1)
 
 from sqlalchemy import text
 from backend.database.connection import engine, Base, DB_HOST, DB_PORT, DB_USER, DB_NAME
