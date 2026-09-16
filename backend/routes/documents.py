@@ -91,19 +91,12 @@ async def upload_document(
         )
 
     # -------------------------------------------------------------------------
-    # Step 4: Text Preprocessing, Sectioning & Keyword Extraction
+    # Step 4: Metadata Extraction, Sectioning & Keyword Extraction
     # -------------------------------------------------------------------------
-    processed_data = process_extracted_document(extraction_data)
-
-    # Resolve Title and Authors (prefer user inputs, then PDF metadata, then filename)
-    pdf_meta = extraction_data.get("metadata", {})
-    resolved_title = (
-        title.strip() if title and title.strip()
-        else pdf_meta.get("title") or os.path.splitext(file.filename)[0].replace("_", " ").title()
-    )
-    resolved_authors = (
-        authors.strip() if authors and authors.strip()
-        else pdf_meta.get("author") or None
+    processed_data = process_extracted_document(
+        extraction_data=extraction_data,
+        custom_title=title,
+        custom_authors=authors
     )
 
     # Determine user association (prefer authenticated JWT user, then explicit user_id, then demo user)
@@ -120,7 +113,6 @@ async def upload_document(
     else:
         assigned_user_id = get_or_create_default_user(db).id
 
-
     # -------------------------------------------------------------------------
     # Step 5: Store in MySQL (Paper, Sections, Keywords) in a Single Transaction
     # -------------------------------------------------------------------------
@@ -128,8 +120,9 @@ async def upload_document(
         # 5a. Create Paper entry
         new_paper = Paper(
             user_id=assigned_user_id,
-            title=resolved_title,
-            authors=resolved_authors,
+            title=processed_data["title"],
+            authors=processed_data["authors"],
+            publication_year=processed_data["publication_year"],
             file_name=file.filename,
             file_path=str(destination_path),
             file_size_bytes=file_size,
@@ -138,27 +131,25 @@ async def upload_document(
             processing_status="completed"
         )
         db.add(new_paper)
-        db.flush()  # Flush to generate new_paper.id for foreign keys
+        db.flush()  # Generates new_paper.id
 
         # 5b. Create PaperSection entries
         for sec in processed_data.get("sections", []):
-            section_entry = PaperSection(
+            db.add(PaperSection(
                 paper_id=new_paper.id,
                 section_name=sec["section_name"],
                 section_order=sec["section_order"],
                 page_number=sec.get("page_number"),
                 content=sec["content"]
-            )
-            db.add(section_entry)
+            ))
 
         # 5c. Create PaperKeyword entries
         for kw in processed_data.get("keywords", []):
-            keyword_entry = PaperKeyword(
+            db.add(PaperKeyword(
                 paper_id=new_paper.id,
                 keyword=kw["keyword"],
                 relevance_score=kw["relevance_score"]
-            )
-            db.add(keyword_entry)
+            ))
 
         db.commit()
         db.refresh(new_paper)
@@ -174,12 +165,14 @@ async def upload_document(
             "saved_filename": unique_name,
             "title": new_paper.title,
             "authors": new_paper.authors,
+            "publication_year": new_paper.publication_year,
             "total_pages": new_paper.total_pages,
             "total_words": extraction_data.get("total_words", 0),
             "abstract": new_paper.abstract[:200] + "..." if new_paper.abstract else None,
             "sections_count": len(processed_data.get("sections", [])),
             "sections": [s["section_name"] for s in processed_data.get("sections", [])],
             "keywords": [k["keyword"] for k in processed_data.get("keywords", [])],
+            "extraction_confidence": processed_data.get("extraction_confidence", {}),
             "upload_status": new_paper.processing_status,
             "uploaded_at": new_paper.uploaded_at.isoformat()
         }

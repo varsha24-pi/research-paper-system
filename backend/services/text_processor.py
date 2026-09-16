@@ -207,11 +207,18 @@ def extract_keywords(full_text: str, top_n: int = 10) -> List[Dict[str, Any]]:
         ]
 
 
-def process_extracted_document(extraction_data: Dict[str, Any]) -> Dict[str, Any]:
+from backend.services.metadata_extractor import MetadataExtractor
+
+
+def process_extracted_document(
+    extraction_data: Dict[str, Any],
+    custom_title: Optional[str] = None,
+    custom_authors: Optional[str] = None
+) -> Dict[str, Any]:
     """
-    Main orchestrator for text preprocessing:
-    Takes output from pdf_extractor.py, cleans text, extracts abstract,
-    segments sections, and extracts top keywords.
+    Main orchestrator for text preprocessing & metadata extraction:
+    Takes output from pdf_extractor.py, uses MetadataExtractor for title/author/abstract/year,
+    segments sections, and extracts top TF-IDF keywords.
     """
     full_text = extraction_data.get("full_text", "")
     pages = extraction_data.get("pages", [])
@@ -219,20 +226,42 @@ def process_extracted_document(extraction_data: Dict[str, Any]) -> Dict[str, Any
     # 1. Clean full text
     cleaned_full_text = clean_text_content(full_text)
 
-    # 2. Extract abstract
-    abstract = extract_abstract(cleaned_full_text)
+    # 2. Extract metadata using MetadataExtractor
+    meta = MetadataExtractor.extract_all_metadata(
+        extraction_data=extraction_data,
+        custom_title=custom_title,
+        custom_authors=custom_authors
+    )
 
-    # 3. Segment into sections
+    # 3. Segment into structured academic sections
     sections = segment_into_sections(cleaned_full_text, pages)
 
-    # 4. Extract top NLP keywords
-    keywords = extract_keywords(cleaned_full_text, top_n=10)
+    # 4. Extract top NLP keywords (TF-IDF)
+    tfidf_keywords = extract_keywords(cleaned_full_text, top_n=10)
+
+    # Merge explicit author keywords (if any) with TF-IDF keywords
+    final_keywords = []
+    seen_kw = set()
+
+    for ek in meta.get("explicit_keywords", []):
+        final_keywords.append({"keyword": ek, "relevance_score": 1.0})
+        seen_kw.add(ek.lower())
+
+    for tk in tfidf_keywords:
+        if tk["keyword"].lower() not in seen_kw:
+            final_keywords.append(tk)
+            seen_kw.add(tk["keyword"].lower())
 
     return {
         "status": "success",
-        "abstract": abstract,
+        "title": meta["title"],
+        "authors": meta["authors"],
+        "abstract": meta["abstract"],
+        "publication_year": meta["publication_year"],
         "sections": sections,
-        "keywords": keywords,
+        "keywords": final_keywords[:12],
         "total_sections": len(sections),
-        "total_keywords": len(keywords)
+        "total_keywords": len(final_keywords[:12]),
+        "extraction_confidence": meta["extraction_confidence"]
     }
+
