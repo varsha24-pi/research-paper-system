@@ -3,32 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI-Powered Research Paper Intelligence System</title>
+    <title>PaperIntel AI - AI-Powered Research Paper Intelligence System</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+    <!-- =======================================================================
+         1. Header & Navigation Bar
+         ======================================================================= -->
     <header class="navbar">
-        <div class="logo">
-            <h2>📚 PaperIntel AI</h2>
-        </div>
+        <a href="index.html" class="brand-container">
+            <span class="brand-logo">📚</span>
+            <div>
+                <span class="brand-title">PaperIntel AI</span>
+                <span class="brand-subtitle">Research Paper Intelligence System</span>
+            </div>
+        </a>
+
         <nav>
-            <a href="index.html" class="active">Home</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="upload.html">Upload Paper</a>
-            <a href="search.html">Search</a>
-            <a href="papers.html">Paper Library</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="upload.html">Upload Paper</a></li>
+                <li><a href="search.html">Search</a></li>
+                <li><a href="papers.html">Paper Library</a></li>
+            </ul>
         </nav>
+
+        <div class="nav-right">
+            <div id="system-status" class="status-badge">
+                <span class="status-dot"></span>
+                <span id="status-text">Checking API...</span>
+            </div>
+            <div class="user-badge">
+                <span>👤</span>
+                <span>Demo Researcher</span>
+            </div>
+        </div>
     </header>
 
-    <main class="hero-section">
-        <h1>AI-Powered Research Paper Intelligence System</h1>
-        <p>Extract, analyze, index, and intelligently search research papers with ease.</p>
-        <div class="cta-buttons">
-            <a href="upload.html" class="btn btn-primary">Upload Research Paper</a>
-            <a href="search.html" class="btn btn-secondary">Search Intelligence</a>
-        </div>
+    <!-- =======================================================================
+         2. Main Hero Section
+         ======================================================================= -->
+    <main class="main-content">
+        <section class="hero">
+            <span class="hero-tag">Minor Project • Academic Research Intelligence</span>
+            <h1>AI-Powered <span>Research Paper</span> Intelligence System</h1>
+            <p class="hero-desc">
+                An end-to-end intelligent platform to ingest academic research PDFs, automatically extract structured sections, generate weighted domain keywords, and retrieve relevant papers with instant context snippets.
+            </p>
+
+            <!-- Main Call-to-Action Buttons -->
+            <div class="hero-cta">
+                <a href="upload.html" class="btn btn-primary">
+                    <span>📤</span> Upload Research Paper
+                </a>
+                <a href="search.html" class="btn btn-secondary">
+                    <span>🔍</span> Search Papers
+                </a>
+                <a href="dashboard.html" class="btn btn-outline">
+                    <span>📊</span> Open Dashboard
+                </a>
+            </div>
+
+            <!-- Instant Live Search Bar -->
+            <div class="search-box-container">
+                <form id="hero-search-form" class="search-form">
+                    <input 
+                        type="text" 
+                        id="hero-search-input" 
+                        class="search-input" 
+                        placeholder="Search across titles, abstracts, and keywords (e.g., 'attention', 'neural network')..."
+                        required
+                    />
+                    <button type="submit" class="search-btn">
+                        <span>🔍 Search</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ===================================================================
+             3. Live System Statistics
+             =================================================================== -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📄</div>
+                <div class="stat-info">
+                    <h3 id="stat-papers">0</h3>
+                    <p>Indexed Research Papers</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📑</div>
+                <div class="stat-info">
+                    <h3 id="stat-sections">0</h3>
+                    <p>Structured Sections Parsed</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🏷️</div>
+                <div class="stat-info">
+                    <h3 id="stat-keywords">0</h3>
+                    <p>NLP Keywords Extracted</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-info">
+                    <h3 id="stat-latency">FastAPI</h3>
+                    <p>MySQL + PyMuPDF Engine</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================
+             4. Live Search Results / Recent Papers Section
+             =================================================================== -->
+        <section class="papers-preview-section">
+            <div class="papers-preview-header">
+                <h2 id="papers-section-title">📥 Recently Uploaded Papers</h2>
+                <a href="papers.html" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.85rem;">
+                    View All Library →
+                </a>
+            </div>
+
+            <div id="papers-list-container" class="papers-list">
+                <p style="color: var(--text-muted); text-align: center; padding: 2rem;">
+                    Loading research papers from database...
+                </p>
+            </div>
+        </section>
+
+        <!-- ===================================================================
+             5. Architectural Capabilities
+             =================================================================== -->
+        <section>
+            <div class="section-header">
+                <h2>System Architecture & Capabilities</h2>
+                <p>Designed for academic rigor, transparent explainability, and high-performance retrieval.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">📑</span>
+                    <h3>PDF Extraction Engine</h3>
+                    <p>High-speed PyMuPDF parser extracts full-text, page boundaries, and embedded author/title metadata with zero formatting loss.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🧹</span>
+                    <h3>NLP Section Segmentation</h3>
+                    <p>Automatically detects and segments papers into standard sections: Abstract, Introduction, Methodology, Results, and Conclusion.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🏷️</span>
+                    <h3>TF-IDF Keyword Weighting</h3>
+                    <p>Statistical NLP filtering extracts top domain concepts and assigns relevance scores for precise categorization.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🎯</span>
+                    <h3>Multi-Field Weighted Search</h3>
+                    <p>Calculates transparent relevance scores across titles, keywords, and sections, returning highlighted context snippets.</p>
+                </div>
+            </div>
+        </section>
     </main>
 
+    <!-- =======================================================================
+         6. Footer
+         ======================================================================= -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="upload.html">Upload</a>
+            <a href="search.html">Search</a>
+            <a href="papers.html">Library</a>
+            <a href="http://127.0.0.1:8000/docs" target="_blank">Swagger API Docs</a>
+        </div>
+        <p>AI-Powered Research Paper Intelligence System • College Minor Project</p>
+        <p style="font-size: 0.78rem; margin-top: 0.35rem; color: #94a3b8;">
+            FastAPI Backend • PyMuPDF & Scikit-Learn NLP • MySQL Relational Storage
+        </p>
+    </footer>
+
+    <!-- Vanilla JavaScript Integration -->
     <script src="js/app.js"></script>
 </body>
 </html>
