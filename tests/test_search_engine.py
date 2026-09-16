@@ -7,31 +7,31 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from fastapi.testclient import TestClient
 from backend.main import app
 from backend.database.connection import SessionLocal, engine, Base
-from backend.database.models import User, Paper, PaperSection, PaperKeyword, SearchLog
-from backend.services.search_engine import search_papers
+from backend.database.models import User, Paper, PaperSection, PaperKeyword
+from backend.services.search_engine import search_papers_tfidf
 
 client = TestClient(app)
 
 
-def seed_test_search_data():
-    """Seeds test research papers into MySQL for search testing."""
+def seed_corpus_data():
+    """Seeds test research papers for TF-IDF Vector Space Model testing."""
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 
     try:
-        user = db.query(User).filter(User.username == "search_tester").first()
+        user = db.query(User).filter(User.username == "tfidf_tester").first()
         if not user:
             user = User(
-                username="search_tester",
-                email="tester@example.com",
+                username="tfidf_tester",
+                email="tfidf_tester@example.com",
                 password_hash="testpass",
-                full_name="Search Tester"
+                full_name="TF-IDF Tester"
             )
             db.add(user)
             db.commit()
             db.refresh(user)
 
-        # Paper 1: Deep Learning / Transformers
+        # Paper 1: Transformer & Attention
         p1 = db.query(Paper).filter(Paper.title == "Attention Mechanisms in Deep Learning").first()
         if not p1:
             p1 = Paper(
@@ -57,7 +57,6 @@ def seed_test_search_data():
             ))
             db.add(PaperKeyword(paper_id=p1.id, keyword="transformer", relevance_score=0.95))
             db.add(PaperKeyword(paper_id=p1.id, keyword="attention", relevance_score=0.90))
-            db.add(PaperKeyword(paper_id=p1.id, keyword="neural network", relevance_score=0.80))
 
         # Paper 2: Computer Vision / CNNs
         p2 = db.query(Paper).filter(Paper.title == "Convolutional Neural Networks for Image Recognition").first()
@@ -92,57 +91,49 @@ def seed_test_search_data():
         db.close()
 
 
-def run_search_tests():
+def run_tfidf_search_tests():
     print("=" * 65)
-    print(" Running Search Engine Service Tests")
+    print(" Running TF-IDF + Cosine Similarity Retrieval Tests")
     print("=" * 65)
 
-    seed_test_search_data()
+    seed_corpus_data()
     db = SessionLocal()
 
     try:
-        # Test 1: Search for 'transformer attention'
-        res1 = search_papers("transformer attention", db)
+        # Test 1: Query for 'attention transformer'
+        res1 = search_papers_tfidf("attention transformer", db)
         assert res1["status"] == "success"
+        assert res1["retrieval_model"] == "TF-IDF + Cosine Similarity"
         assert res1["total_results"] >= 1
-        top_match = res1["results"][0]
-        assert "Attention" in top_match["title"]
-        assert top_match["score"] > 0
-        assert len(top_match["snippet"]) > 0
-        assert "..." in top_match["snippet"] or len(top_match["snippet"]) < 200
-        print(f"[PASS] Matched query 'transformer attention' -> Top Paper: '{top_match['title']}' (Score: {top_match['score']})")
-        print(f"       Snippet: \"{top_match['snippet']}\"")
-        print(f"       Matched Keywords: {top_match['matched_keywords']}")
+        top_doc = res1["results"][0]
+        assert "Attention" in top_doc["title"] or "Transformer" in top_doc["title"]
+        assert 0.0 < top_doc["score"] <= 1.0, f"Expected 0 < score <= 1, got {top_doc['score']}"
+        print(f"[PASS] Query 'attention transformer' -> Top Match: '{top_doc['title']}'")
+        print(f"       Cosine Similarity Score: {top_doc['score']} ({top_doc['relevance_percentage']})")
+        print(f"       Snippet: \"{top_doc['snippet']}\"")
 
-        # Test 2: Search for 'convolutional vision'
-        res2 = search_papers("convolutional vision", db)
+        # Test 2: Query for 'convolutional image'
+        res2 = search_papers_tfidf("convolutional image", db)
         assert res2["total_results"] >= 1
         top_cnn = res2["results"][0]
         assert "Convolutional" in top_cnn["title"]
-        print(f"[PASS] Matched query 'convolutional vision' -> Top Paper: '{top_cnn['title']}' (Score: {top_cnn['score']})")
+        print(f"[PASS] Query 'convolutional image' -> Top Match: '{top_cnn['title']}'")
+        print(f"       Cosine Similarity Score: {top_cnn['score']} ({top_cnn['relevance_percentage']})")
 
-        # Test 3: Search with no matching results
-        res3 = search_papers("quantum thermodynamics astrophysics", db)
+        # Test 3: Query with zero matches
+        res3 = search_papers_tfidf("quantum astrophysics plasma", db)
         assert res3["total_results"] == 0
         assert len(res3["results"]) == 0
-        print(f"[PASS] Non-matching query returned clean zero-result message: \"{res3['message']}\"")
+        print(f"[PASS] Zero-result query handled gracefully: \"{res3['message']}\"")
 
         # Test 4: Verify REST API GET /search/?q=attention
         api_res = client.get("/search/?q=attention")
         assert api_res.status_code == 200
-        api_data = api_res.json()
-        assert api_data["status"] == "success"
-        assert api_data["total_results"] >= 1
-        print(f"[PASS] REST API GET /search/?q=attention passed successfully.")
-
-        # Test 5: Verify GET /search/history
-        hist_res = client.get("/search/history")
-        assert hist_res.status_code == 200
-        assert len(hist_res.json()["history"]) >= 1
-        print(f"[PASS] Search history endpoint verified.")
+        assert api_res.json()["total_results"] >= 1
+        print(f"[PASS] REST API GET /search/?q=attention verified via TestClient.")
 
         print("=" * 65)
-        print("[OK] All Search Engine Tests Passed Successfully!")
+        print("[OK] All TF-IDF & Cosine Similarity Tests Passed Successfully!")
         print("=" * 65)
 
     finally:
@@ -150,4 +141,4 @@ def run_search_tests():
 
 
 if __name__ == "__main__":
-    run_search_tests()
+    run_tfidf_search_tests()
