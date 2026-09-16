@@ -20,6 +20,7 @@ class SearchResultItem(BaseModel):
     authors: Optional[str] = Field(None, description="Paper authors")
     publication_year: Optional[int] = Field(None, description="Year of publication")
     score: float = Field(..., description="Weighted relevance score calculated by the search engine")
+    relevance_percentage: Optional[str] = Field(None, description="Human readable percentage format")
     snippet: str = Field(..., description="Short context snippet containing matching terms")
     matched_keywords: List[str] = Field(default=[], description="Keywords matching the search query")
     total_pages: int = Field(..., description="Total pages in the PDF document")
