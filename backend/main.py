@@ -42,13 +42,11 @@ app.add_middleware(
 # -----------------------------------------------------------------------------
 # 3. Router Registration
 # -----------------------------------------------------------------------------
-from backend.routes import documents, search
+from backend.routes import auth, documents, search
+app.include_router(auth.router)
 app.include_router(documents.router)
 app.include_router(search.router)
 
-# Future modules to include:
-# from backend.routes import auth
-# app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 
 
 # -----------------------------------------------------------------------------

@@ -10,6 +10,7 @@ from backend.database.models import User, Paper, PaperSection, PaperKeyword
 from backend.utils.helpers import validate_pdf_file, generate_unique_filename
 from backend.services.pdf_extractor import extract_text_from_pdf, PDFExtractionError
 from backend.services.text_processor import process_extracted_document
+from backend.routes.auth import get_optional_current_user, get_current_user
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
@@ -42,7 +43,8 @@ async def upload_document(
     file: UploadFile = File(..., description="The PDF research paper to upload"),
     title: Optional[str] = Form(None, description="Optional custom paper title"),
     authors: Optional[str] = Form(None, description="Optional authors (comma-separated)"),
-    user_id: Optional[int] = Form(None, description="Optional user ID (defaults to demo researcher)"),
+    user_id: Optional[int] = Form(None, description="Optional user ID"),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -51,7 +53,7 @@ async def upload_document(
     2. Save PDF to disk
     3. Extract text & metadata (PyMuPDF)
     4. Clean text, segment sections & extract keywords (NLP/TF-IDF)
-    5. Save Paper, PaperSection, and PaperKeyword records to MySQL
+    5. Save Paper, PaperSection, and PaperKeyword records to MySQL (linked to user)
     6. Return structured response with extracted intelligence
     """
     # -------------------------------------------------------------------------
@@ -104,8 +106,10 @@ async def upload_document(
         else pdf_meta.get("author") or None
     )
 
-    # Determine user association
-    if user_id:
+    # Determine user association (prefer authenticated JWT user, then explicit user_id, then demo user)
+    if current_user:
+        assigned_user_id = current_user.id
+    elif user_id:
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             raise HTTPException(
@@ -115,6 +119,7 @@ async def upload_document(
         assigned_user_id = user.id
     else:
         assigned_user_id = get_or_create_default_user(db).id
+
 
     # -------------------------------------------------------------------------
     # Step 5: Store in MySQL (Paper, Sections, Keywords) in a Single Transaction
@@ -269,3 +274,34 @@ def get_document(
             ]
         }
     }
+
+
+@router.get("/user/my-papers", status_code=status.HTTP_200_OK, summary="Get papers uploaded by current user")
+def get_my_documents(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Protected Endpoint: Returns all research papers uploaded by the currently authenticated user.
+    """
+    papers = db.query(Paper).filter(Paper.user_id == current_user.id).order_by(Paper.uploaded_at.desc()).all()
+    return {
+        "status": "success",
+        "user_id": current_user.id,
+        "username": current_user.username,
+        "total_documents": len(papers),
+        "documents": [
+            {
+                "id": p.id,
+                "title": p.title,
+                "authors": p.authors,
+                "filename": p.file_name,
+                "file_size_bytes": p.file_size_bytes,
+                "total_pages": p.total_pages,
+                "processing_status": p.processing_status,
+                "uploaded_at": p.uploaded_at.isoformat()
+            }
+            for p in papers
+        ]
+    }
+
