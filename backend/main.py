@@ -40,14 +40,16 @@ app.add_middleware(
 )
 
 # -----------------------------------------------------------------------------
-# 3. Router Placeholders (Modular Route Management)
+# 3. Router Registration
 # -----------------------------------------------------------------------------
-# Once route files are implemented, import and include them here:
-#
-# from backend.routes import auth, documents, search
-# app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-# app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
-# app.include_router(search.router, prefix="/api/search", tags=["Search & Retrieval"])
+from backend.routes import documents
+app.include_router(documents.router)
+
+# Future modules to include as they are implemented:
+# from backend.routes import auth, search
+# app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+# app.include_router(search.router, prefix="/search", tags=["Search & Retrieval"])
+
 
 # -----------------------------------------------------------------------------
 # 4. Core System Endpoints
