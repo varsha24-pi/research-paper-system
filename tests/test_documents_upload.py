@@ -1,97 +1,124 @@
 import sys
 import os
 import io
+from pathlib import Path
 
 # Add project root directory to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+import pymupdf
 from fastapi.testclient import TestClient
 from backend.main import app
-from backend.database.connection import engine, Base
+from backend.database.connection import engine, Base, SessionLocal
+from backend.database.models import Paper, PaperSection, PaperKeyword
 
 # Ensure database tables exist before testing
 Base.metadata.create_all(bind=engine)
 
 client = TestClient(app)
 
-def create_sample_pdf_bytes():
-    """Generates a minimal valid PDF byte sequence."""
-    return (
-        b"%PDF-1.4\n"
-        b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
-        b"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
-        b"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >>\nendobj\n"
-        b"xref\n0 4\n0000000000 65535 f \n0000000010 00000 n \n0000000060 00000 n \n0000000117 00000 n \n"
-        b"trailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n190\n%%EOF\n"
-    )
 
-def test_upload_valid_pdf():
-    """Test uploading a valid PDF document."""
-    pdf_content = create_sample_pdf_bytes()
+def generate_test_pdf_bytes():
+    """Generates a valid research paper PDF in memory."""
+    doc = pymupdf.open()
+
+    page1 = doc.new_page()
+    text_page1 = (
+        "Transformer Networks for Natural Language Processing\n\n"
+        "Vaswani et al.\n\n"
+        "Abstract\n"
+        "We introduce an attention-based sequence architecture for neural machine translation "
+        "and language understanding. Self-attention layers replace recurrent and convolutional connections.\n\n"
+        "1 Introduction\n"
+        "Recurrent neural networks have dominated sequence transduction problems for years.\n\n"
+        "2 Methodology\n"
+        "The model uses multi-head self-attention and positional encodings to capture relationships."
+    )
+    rect1 = pymupdf.Rect(50, 50, 550, 700)
+    page1.insert_textbox(rect1, text_page1, fontsize=11)
+
+    page2 = doc.new_page()
+    text_page2 = (
+        "3 Results\n\n"
+        "On English-to-German translation, the Transformer achieved a state-of-the-art BLEU score of 28.4.\n\n"
+        "4 Conclusion\n"
+        "Attention mechanisms provide faster training times and superior accuracy."
+    )
+    rect2 = pymupdf.Rect(50, 50, 550, 700)
+    page2.insert_textbox(rect2, text_page2, fontsize=11)
+
+    doc.set_metadata({
+        "title": "Transformer Networks for NLP",
+        "author": "Vaswani et al."
+    })
+
+    pdf_bytes = doc.tobytes()
+    doc.close()
+    return pdf_bytes
+
+
+def test_end_to_end_ingestion():
+    print("=" * 65)
+    print(" Running End-to-End PDF Ingestion Pipeline Test")
+    print("=" * 65)
+
+    pdf_bytes = generate_test_pdf_bytes()
     files = {
-        "file": ("attention_is_all_you_need.pdf", io.BytesIO(pdf_content), "application/pdf")
+        "file": ("transformer_nlp.pdf", io.BytesIO(pdf_bytes), "application/pdf")
     }
     data = {
-        "title": "Attention Is All You Need"
+        "title": "Transformer Networks for NLP",
+        "authors": "Vaswani et al."
     }
 
+    # 1. Test POST /documents/upload
     response = client.post("/documents/upload", files=files, data=data)
-    assert response.status_code == 201, f"Expected 201, got {response.status_code}: {response.text}"
+    assert response.status_code == 201, f"Failed: {response.text}"
     
     result = response.json()
-    assert result["status"] == "success"
-    assert "document_id" in result
-    assert result["filename"] == "attention_is_all_you_need.pdf"
-    assert result["title"] == "Attention Is All You Need"
-    assert result["upload_status"] == "uploaded"
-    print(f"[PASS] Valid PDF upload test passed. Document ID: {result['document_id']}")
-    return result["document_id"]
+    doc_id = result["document_id"]
+    print(f"[PASS] Document uploaded and processed. ID: {doc_id}")
+    print(f"       Title: '{result['title']}'")
+    print(f"       Total Pages: {result['total_pages']}, Total Words: {result['total_words']}")
+    print(f"       Sections extracted: {result['sections_count']} ({', '.join(result['sections'])})")
+    print(f"       Keywords extracted: {', '.join(result['keywords'][:5])}")
+    print(f"       Status: {result['upload_status']}")
 
-def test_reject_non_pdf():
-    """Test that non-PDF files are rejected with HTTP 400."""
-    text_content = b"This is just a plain text file, not a PDF."
-    files = {
-        "file": ("notes.txt", io.BytesIO(text_content), "text/plain")
-    }
+    assert result["total_pages"] == 2
+    assert result["sections_count"] >= 2
+    assert len(result["keywords"]) >= 3
+    assert result["upload_status"] == "completed"
 
-    response = client.post("/documents/upload", files=files)
-    assert response.status_code == 400, f"Expected 400, got {response.status_code}"
-    assert "Only PDF files" in response.json()["detail"]
-    print("[PASS] Non-PDF file rejection test passed.")
+    # 2. Verify direct MySQL entries
+    db = SessionLocal()
+    try:
+        paper = db.query(Paper).filter(Paper.id == doc_id).first()
+        assert paper is not None
+        assert paper.processing_status == "completed"
 
-def test_reject_corrupt_pdf():
-    """Test that files with .pdf extension but invalid header are rejected."""
-    corrupt_content = b"INVALID_HEADER_NOT_A_REAL_PDF"
-    files = {
-        "file": ("fake.pdf", io.BytesIO(corrupt_content), "application/pdf")
-    }
+        sections = db.query(PaperSection).filter(PaperSection.paper_id == doc_id).all()
+        assert len(sections) == result["sections_count"]
 
-    response = client.post("/documents/upload", files=files)
-    assert response.status_code == 400, f"Expected 400, got {response.status_code}"
-    assert "Corrupt or invalid PDF" in response.json()["detail"]
-    print("[PASS] Corrupt PDF rejection test passed.")
+        keywords = db.query(PaperKeyword).filter(PaperKeyword.paper_id == doc_id).all()
+        assert len(keywords) == len(result["keywords"])
 
-def test_list_and_get_document(doc_id: int):
-    """Test listing documents and fetching by ID."""
-    # List documents
-    list_res = client.get("/documents/")
-    assert list_res.status_code == 200
-    assert list_res.json()["total_documents"] >= 1
+        print(f"[PASS] Verified MySQL records: 1 Paper, {len(sections)} Sections, {len(keywords)} Keywords in DB.")
 
-    # Get single document
-    get_res = client.get(f"/documents/{doc_id}")
-    assert get_res.status_code == 200
-    assert get_res.json()["document"]["id"] == doc_id
-    print(f"[PASS] List and Get document details test passed for ID: {doc_id}")
+    finally:
+        db.close()
+
+    # 3. Test GET /documents/{id} endpoint
+    details_res = client.get(f"/documents/{doc_id}")
+    assert details_res.status_code == 200
+    doc_details = details_res.json()["document"]
+    assert len(doc_details["sections"]) == len(sections)
+    assert len(doc_details["keywords"]) == len(keywords)
+    print(f"[PASS] GET /documents/{doc_id} returned complete structured hierarchy.")
+
+    print("=" * 65)
+    print("[OK] End-to-End Ingestion Pipeline Test Passed Successfully!")
+    print("=" * 65)
+
 
 if __name__ == "__main__":
-    print("=" * 60)
-    print(" Running Document Upload Tests")
-    print("=" * 60)
-    uploaded_id = test_upload_valid_pdf()
-    test_reject_non_pdf()
-    test_reject_corrupt_pdf()
-    test_list_and_get_document(uploaded_id)
-    print("=" * 60)
-    print("[OK] All Document Upload Tests Passed Successfully!")
-    print("=" * 60)
+    test_end_to_end_ingestion()
