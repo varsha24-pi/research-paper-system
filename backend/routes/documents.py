@@ -261,7 +261,8 @@ def get_document(
                     "section_name": s.section_name,
                     "section_order": s.section_order,
                     "page_number": s.page_number,
-                    "preview": s.content[:150] + "..." if len(s.content) > 150 else s.content
+                    "preview": s.content[:150] + "..." if len(s.content) > 150 else s.content,
+                    "content": s.content
                 }
                 for s in sorted(paper.sections, key=lambda x: x.section_order)
             ]

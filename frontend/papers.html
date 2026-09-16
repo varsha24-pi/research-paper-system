@@ -3,24 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Library - Research Paper Intelligence System</title>
+    <title>Paper Library - PaperIntel AI</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .library-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .library-search-input {
+            padding: 0.65rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            width: 320px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .library-search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .paper-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .library-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+        }
+
+        .library-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: #93c5fd;
+        }
+
+        .library-card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-decoration: none;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .library-card-title:hover {
+            color: var(--primary);
+        }
+    </style>
 </head>
 <body>
+
+    <!-- Header Navigation -->
     <header class="navbar">
-        <div class="logo"><h2>📚 PaperIntel AI</h2></div>
+        <a href="index.html" class="brand-container">
+            <span class="brand-logo">📚</span>
+            <div>
+                <span class="brand-title">PaperIntel AI</span>
+                <span class="brand-subtitle">Research Paper Intelligence System</span>
+            </div>
+        </a>
+
         <nav>
-            <a href="index.html">Home</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="upload.html">Upload Paper</a>
-            <a href="search.html">Search</a>
-            <a href="papers.html" class="active">Paper Library</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="upload.html">Upload Paper</a></li>
+                <li><a href="search.html">Search</a></li>
+                <li><a href="papers.html" class="active">Paper Library</a></li>
+            </ul>
         </nav>
+
+        <div class="nav-right">
+            <div id="system-status" class="status-badge">
+                <span class="status-dot"></span>
+                <span id="status-text">Checking API...</span>
+            </div>
+        </div>
     </header>
-    <main class="hero-section">
-        <h1>Research Paper Library</h1>
-        <p>Browse, filter, and access all ingested research documents.</p>
+
+    <main class="main-content">
+        <div class="breadcrumb-nav">
+            <a href="index.html">← Back to Home</a>
+        </div>
+
+        <div class="library-header">
+            <div>
+                <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-main);">
+                    📚 Ingested Research Paper Library
+                </h1>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">
+                    Browse and inspect all structured research papers currently indexed in MySQL.
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <input 
+                    type="text" 
+                    id="library-filter" 
+                    class="library-search-input" 
+                    placeholder="Filter papers by title, author, keyword..."
+                />
+                <a href="upload.html" class="btn btn-primary" style="white-space: nowrap;">
+                    + Upload Paper
+                </a>
+            </div>
+        </div>
+
+        <!-- Library Container -->
+        <div id="library-loading" style="text-align: center; padding: 4rem 1rem;">
+            <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">⏳</span>
+            <p style="color: var(--text-muted);">Loading research papers from database...</p>
+        </div>
+
+        <div id="library-empty" class="alert alert-info" style="display: none; text-align: center; padding: 3rem 1.5rem;">
+            <h3>📂 No research papers found</h3>
+            <p style="margin-top: 0.5rem;">Upload your first research paper PDF to begin building your intelligence library.</p>
+            <div style="margin-top: 1rem;">
+                <a href="upload.html" class="btn btn-primary">Upload PDF Paper Now</a>
+            </div>
+        </div>
+
+        <div id="papers-grid" class="paper-grid" style="display: none;"></div>
     </main>
+
+    <footer class="footer">
+        <p>AI-Powered Research Paper Intelligence System • College Minor Project</p>
+    </footer>
+
     <script src="js/app.js"></script>
+    <script>
+        let allPapers = [];
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const loading = document.getElementById("library-loading");
+            const emptyBox = document.getElementById("library-empty");
+            const grid = document.getElementById("papers-grid");
+            const filterInput = document.getElementById("library-filter");
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/documents/?limit=100`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                allPapers = data.documents || [];
+
+                loading.style.display = "none";
+
+                if (allPapers.length === 0) {
+                    emptyBox.style.display = "block";
+                    return;
+                }
+
+                renderPapers(allPapers);
+                grid.style.display = "grid";
+
+                filterInput.addEventListener("input", (e) => {
+                    const query = e.target.value.toLowerCase().trim();
+                    if (!query) {
+                        renderPapers(allPapers);
+                        return;
+                    }
+
+                    const filtered = allPapers.filter(p => {
+                        const title = (p.title || p.filename || "").toLowerCase();
+                        const authors = (p.authors || "").toLowerCase();
+                        const keywords = (p.keywords || []).join(" ").toLowerCase();
+                        return title.includes(query) || authors.includes(query) || keywords.includes(query);
+                    });
+
+                    renderPapers(filtered);
+                });
+
+            } catch (err) {
+                loading.style.display = "none";
+                emptyBox.style.display = "block";
+                emptyBox.innerHTML = `
+                    <div style="color: var(--danger);">
+                        <p><strong>⚠️ Unable to connect to backend server.</strong></p>
+                        <p style="font-size: 0.85rem; margin-top: 0.35rem;">
+                            Ensure your FastAPI backend is running at <code>http://127.0.0.1:8000</code>.
+                        </p>
+                    </div>
+                `;
+            }
+        });
+
+        function renderPapers(papers) {
+            const grid = document.getElementById("papers-grid");
+            if (papers.length === 0) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">No papers matched your filter query.</p>`;
+                return;
+            }
+
+            grid.innerHTML = papers.map(p => `
+                <div class="library-card">
+                    <div>
+                        <a href="viewer.html?id=${p.id}" class="library-card-title">
+                            📄 ${escapeHtml(p.title || p.filename)}
+                        </a>
+                        <div class="paper-meta" style="margin-bottom: 0.75rem;">
+                            <span>✍️ ${escapeHtml(p.authors || "Authors not specified")}</span>
+                        </div>
+                        <div class="paper-meta" style="margin-bottom: 1rem;">
+                            <span>📑 ${p.total_pages || 1} Pages</span>
+                            <span>📦 ${formatBytes(p.file_size_bytes || 0)}</span>
+                            <span>🕒 ${formatDate(p.uploaded_at)}</span>
+                        </div>
+                        ${p.keywords && p.keywords.length > 0 ? `
+                            <div class="tag-list" style="margin-bottom: 1rem;">
+                                ${p.keywords.slice(0, 4).map(k => `<span class="tag">🏷️ ${escapeHtml(k)}</span>`).join("")}
+                            </div>
+                        ` : ""}
+                    </div>
+                    <div style="border-top: 1px solid #f1f5f9; padding-top: 1rem; margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.82rem; color: var(--text-muted);">ID #${p.id}</span>
+                        <a href="viewer.html?id=${p.id}" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.4rem 0.85rem;">
+                            View Details →
+                        </a>
+                    </div>
+                </div>
+            `).join("");
+        }
+    </script>
 </body>
 </html>

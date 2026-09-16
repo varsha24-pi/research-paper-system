@@ -3,24 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Research Paper Intelligence System</title>
+    <title>Research Dashboard - PaperIntel AI</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+    <!-- Header Navigation -->
     <header class="navbar">
-        <div class="logo"><h2>📚 PaperIntel AI</h2></div>
+        <a href="index.html" class="brand-container">
+            <span class="brand-logo">📚</span>
+            <div>
+                <span class="brand-title">PaperIntel AI</span>
+                <span class="brand-subtitle">Research Paper Intelligence System</span>
+            </div>
+        </a>
+
         <nav>
-            <a href="index.html">Home</a>
-            <a href="dashboard.html" class="active">Dashboard</a>
-            <a href="upload.html">Upload Paper</a>
-            <a href="search.html">Search</a>
-            <a href="papers.html">Paper Library</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                <li><a href="upload.html">Upload Paper</a></li>
+                <li><a href="search.html">Search</a></li>
+                <li><a href="papers.html">Paper Library</a></li>
+            </ul>
         </nav>
+
+        <div class="nav-right">
+            <div id="system-status" class="status-badge">
+                <span class="status-dot"></span>
+                <span id="status-text">Checking API...</span>
+            </div>
+        </div>
     </header>
-    <main class="hero-section">
-        <h1>Research Dashboard</h1>
-        <p>Overview of indexed research papers, keywords, and system analytics.</p>
+
+    <main class="main-content">
+        <div class="breadcrumb-nav">
+            <a href="index.html">← Back to Home</a>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-main);">
+                📊 Research Analytics & Intelligence Dashboard
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">
+                Live overview of corpus statistics, section parsing metrics, and user search behavior.
+            </p>
+        </div>
+
+        <!-- Live Statistics Cards -->
+        <section class="stats-grid" style="margin-bottom: 2.5rem;">
+            <div class="stat-card">
+                <div class="stat-icon">📄</div>
+                <div class="stat-info">
+                    <h3 id="stat-papers">0</h3>
+                    <p>Indexed Papers</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📑</div>
+                <div class="stat-info">
+                    <h3 id="stat-sections">0</h3>
+                    <p>Sections Parsed</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🏷️</div>
+                <div class="stat-info">
+                    <h3 id="stat-keywords">0</h3>
+                    <p>NLP Keywords</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-info">
+                    <h3 id="stat-engine">PyMuPDF</h3>
+                    <p>TF-IDF + Cosine Retrieval</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Two Column Layout: Recent Papers & Search History -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+            <!-- Column 1: Recently Ingested Papers -->
+            <div class="search-card" style="margin-bottom: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">
+                        📥 Recently Ingested Documents
+                    </h2>
+                    <a href="papers.html" style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">View All →</a>
+                </div>
+                <div id="dash-recent-papers" class="papers-list">
+                    <p style="color: var(--text-muted); text-align: center; padding: 1.5rem;">Loading papers...</p>
+                </div>
+            </div>
+
+            <!-- Column 2: Search Query History -->
+            <div class="search-card" style="margin-bottom: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">
+                        🕒 Recent Search Query History
+                    </h2>
+                    <a href="search.html" style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">Search Now →</a>
+                </div>
+                <div id="dash-search-history" class="papers-list">
+                    <p style="color: var(--text-muted); text-align: center; padding: 1.5rem;">Loading search history...</p>
+                </div>
+            </div>
+        </div>
     </main>
+
+    <footer class="footer">
+        <p>AI-Powered Research Paper Intelligence System • College Minor Project</p>
+    </footer>
+
     <script src="js/app.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Load Recent Papers
+            const papersContainer = document.getElementById("dash-recent-papers");
+            try {
+                const res = await fetch(`${API_BASE_URL}/documents/?limit=5`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const docs = data.documents || [];
+                    if (docs.length === 0) {
+                        papersContainer.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 1.5rem;">No papers uploaded yet.</p>`;
+                    } else {
+                        papersContainer.innerHTML = docs.map(p => `
+                            <div style="padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9;">
+                                <a href="viewer.html?id=${p.id}" style="font-weight: 600; color: var(--text-main); text-decoration: none; font-size: 0.95rem;">
+                                    📄 ${escapeHtml(p.title || p.filename)}
+                                </a>
+                                <div class="paper-meta" style="margin-top: 0.25rem; font-size: 0.82rem;">
+                                    <span>✍️ ${escapeHtml(p.authors || "N/A")}</span>
+                                    <span>🕒 ${formatDate(p.uploaded_at)}</span>
+                                </div>
+                            </div>
+                        `).join("");
+                    }
+                }
+            } catch (e) {
+                papersContainer.innerHTML = `<p style="color: var(--danger); text-align: center; padding: 1rem;">Failed to fetch documents.</p>`;
+            }
+
+            // Load Search History
+            const historyContainer = document.getElementById("dash-search-history");
+            try {
+                const res = await fetch(`${API_BASE_URL}/search/history?limit=6`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const logs = data.history || [];
+                    if (logs.length === 0) {
+                        historyContainer.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 1.5rem;">No search queries recorded yet.</p>`;
+                    } else {
+                        historyContainer.innerHTML = logs.map(l => `
+                            <div style="padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <span style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">
+                                        🔍 "${escapeHtml(l.query)}"
+                                    </span>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                        ${formatDate(l.searched_at)}
+                                    </div>
+                                </div>
+                                <span class="tag-pill" style="font-size: 0.75rem;">
+                                    ${l.results_count} result(s)
+                                </span>
+                            </div>
+                        `).join("");
+                    }
+                }
+            } catch (e) {
+                historyContainer.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 1rem;">History logging active.</p>`;
+            }
+        });
+    </script>
 </body>
 </html>

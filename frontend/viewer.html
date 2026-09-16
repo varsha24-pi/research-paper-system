@@ -3,24 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Viewer - Research Paper Intelligence System</title>
+    <title>Paper Viewer & Analysis - PaperIntel AI</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .viewer-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 4rem;
+        }
+
+        .viewer-header-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .viewer-title {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 0.75rem;
+            line-height: 1.3;
+        }
+
+        .viewer-authors {
+            font-size: 1.05rem;
+            color: var(--secondary);
+            margin-bottom: 1.25rem;
+            font-weight: 500;
+        }
+
+        .viewer-meta-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .meta-pill {
+            background: #f1f5f9;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-weight: 500;
+        }
+
+        .abstract-card {
+            background: #f8fafc;
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-sm);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            line-height: 1.7;
+            font-size: 0.98rem;
+            color: #334155;
+        }
+
+        .section-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .section-header-btn {
+            width: 100%;
+            text-align: left;
+            background: white;
+            border: none;
+            padding: 1.15rem 1.5rem;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 1px solid transparent;
+        }
+
+        .section-header-btn:hover {
+            background: #f8fafc;
+        }
+
+        .section-body {
+            padding: 1.25rem 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.75;
+            color: #334155;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            white-space: pre-wrap;
+        }
+
+        .tag-pill {
+            background: #eff6ff;
+            color: var(--primary);
+            border: 1px solid #bfdbfe;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
+
+    <!-- Header Navigation -->
     <header class="navbar">
-        <div class="logo"><h2>📚 PaperIntel AI</h2></div>
+        <a href="index.html" class="brand-container">
+            <span class="brand-logo">📚</span>
+            <div>
+                <span class="brand-title">PaperIntel AI</span>
+                <span class="brand-subtitle">Research Paper Intelligence System</span>
+            </div>
+        </a>
+
         <nav>
-            <a href="index.html">Home</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="upload.html">Upload Paper</a>
-            <a href="search.html">Search</a>
-            <a href="papers.html">Paper Library</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="upload.html">Upload Paper</a></li>
+                <li><a href="search.html">Search</a></li>
+                <li><a href="papers.html">Paper Library</a></li>
+            </ul>
         </nav>
+
+        <div class="nav-right">
+            <div id="system-status" class="status-badge">
+                <span class="status-dot"></span>
+                <span id="status-text">Checking API...</span>
+            </div>
+        </div>
     </header>
-    <main class="hero-section">
-        <h1>Document Viewer & Analysis</h1>
-        <p>Structured section reading, extracted metadata, and keyword highlights.</p>
+
+    <main class="viewer-container">
+        <div class="breadcrumb-nav">
+            <a href="papers.html">← Back to Paper Library</a>
+            <span style="margin: 0 0.5rem; color: var(--text-muted);">|</span>
+            <a href="search.html">🔍 Search Other Papers</a>
+        </div>
+
+        <!-- Loading State -->
+        <div id="viewer-loading" style="text-align: center; padding: 4rem 1rem;">
+            <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">⏳</span>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">
+                Fetching & Rendering Structured Document...
+            </h3>
+            <p style="color: var(--text-muted); margin-top: 0.35rem;">
+                Connecting to FastAPI backend at <code>http://127.0.0.1:8000</code>
+            </p>
+        </div>
+
+        <!-- Error State -->
+        <div id="viewer-error" class="alert alert-error" style="display: none; margin-top: 2rem;">
+            <h3 style="font-weight: 700; margin-bottom: 0.5rem;">⚠️ Document Not Found or Server Offline</h3>
+            <p id="viewer-error-msg">Unable to load document details.</p>
+            <div style="margin-top: 1rem;">
+                <a href="papers.html" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.4rem 1rem;">
+                    Browse All Available Papers
+                </a>
+            </div>
+        </div>
+
+        <!-- Paper Details View -->
+        <div id="viewer-content" style="display: none;">
+            <div class="viewer-header-card">
+                <h1 id="paper-title" class="viewer-title">Paper Title</h1>
+                <div id="paper-authors" class="viewer-authors">✍️ Authors</div>
+
+                <div class="viewer-meta-grid">
+                    <span class="meta-pill" id="meta-year">📅 Year: --</span>
+                    <span class="meta-pill" id="meta-pages">📑 Pages: --</span>
+                    <span class="meta-pill" id="meta-size">📦 Size: --</span>
+                    <span class="meta-pill" id="meta-id">🆔 Document ID: #--</span>
+                    <span class="meta-pill" id="meta-date">🕒 Uploaded: --</span>
+                </div>
+
+                <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">
+                    🏷️ Extracted NLP & Domain Keywords
+                </h3>
+                <div id="paper-keywords" class="tag-list" style="margin-bottom: 0.5rem;"></div>
+            </div>
+
+            <!-- Abstract -->
+            <div id="abstract-section" style="margin-bottom: 2rem;">
+                <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 0.75rem; color: var(--text-main);">
+                    📄 Abstract
+                </h2>
+                <div id="paper-abstract" class="abstract-card">
+                    Abstract content will be rendered here.
+                </div>
+            </div>
+
+            <!-- Structured Sections -->
+            <div id="sections-container-wrapper">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main);">
+                        📑 Structured Document Sections (<span id="sections-count">0</span>)
+                    </h2>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">
+                        Auto-segmented by NLP engine
+                    </span>
+                </div>
+                <div id="paper-sections-list"></div>
+            </div>
+
+            <!-- Quick Action Bar -->
+            <div style="display: flex; gap: 1rem; margin-top: 2.5rem; justify-content: center; flex-wrap: wrap;">
+                <a href="upload.html" class="btn btn-primary">📤 Upload Another Paper</a>
+                <a href="search.html" class="btn btn-secondary">🔍 Search Papers</a>
+                <a href="papers.html" class="btn btn-outline">📚 Return to Library</a>
+            </div>
+        </div>
     </main>
+
+    <footer class="footer">
+        <p>AI-Powered Research Paper Intelligence System • College Minor Project</p>
+    </footer>
+
     <script src="js/app.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const loading = document.getElementById("viewer-loading");
+            const errorBox = document.getElementById("viewer-error");
+            const errorMsg = document.getElementById("viewer-error-msg");
+            const content = document.getElementById("viewer-content");
+
+            const urlParams = new URLSearchParams(window.location.search);
+            let docId = urlParams.get("id");
+
+            // If no ID passed, try fetching the first available document
+            if (!docId) {
+                try {
+                    const listRes = await fetch(`${API_BASE_URL}/documents/?limit=1`);
+                    if (listRes.ok) {
+                        const listData = await listRes.json();
+                        if (listData.documents && listData.documents.length > 0) {
+                            docId = listData.documents[0].id;
+                        }
+                    }
+                } catch (e) {
+                    console.warn(e);
+                }
+            }
+
+            if (!docId) {
+                loading.style.display = "none";
+                errorMsg.textContent = "No document ID specified and no papers currently in database.";
+                errorBox.style.display = "block";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/documents/${docId}`);
+                if (!response.ok) {
+                    throw new Error(`Document #${docId} not found (HTTP ${response.status})`);
+                }
+
+                const data = await response.json();
+                const doc = data.document;
+
+                // Render Header
+                document.getElementById("paper-title").textContent = doc.title || doc.filename || "Untitled Research Paper";
+                document.getElementById("paper-authors").textContent = doc.authors ? `✍️ ${doc.authors}` : "✍️ Authors not specified";
+                document.getElementById("meta-year").textContent = `📅 Year: ${doc.publication_year || "N/A"}`;
+                document.getElementById("meta-pages").textContent = `📑 Pages: ${doc.total_pages || 1}`;
+                document.getElementById("meta-size").textContent = `📦 Size: ${formatBytes(doc.file_size_bytes || 0)}`;
+                document.getElementById("meta-id").textContent = `🆔 Document ID: #${doc.id}`;
+                document.getElementById("meta-date").textContent = `🕒 Uploaded: ${formatDate(doc.uploaded_at)}`;
+
+                // Keywords
+                const kwContainer = document.getElementById("paper-keywords");
+                if (doc.keywords && doc.keywords.length > 0) {
+                    kwContainer.innerHTML = doc.keywords.map(k => `
+                        <span class="tag-pill" title="Relevance Score: ${k.relevance_score || 'N/A'}">
+                            🏷️ ${escapeHtml(k.keyword)} ${k.relevance_score ? `(${Math.round(k.relevance_score * 100)}%)` : ''}
+                        </span>
+                    `).join("");
+                } else {
+                    kwContainer.innerHTML = `<span style="font-size: 0.85rem; color: var(--text-muted);">No keywords extracted.</span>`;
+                }
+
+                // Abstract
+                const abstractBox = document.getElementById("paper-abstract");
+                if (doc.abstract) {
+                    abstractBox.textContent = doc.abstract;
+                } else {
+                    document.getElementById("abstract-section").style.display = "none";
+                }
+
+                // Sections
+                const sectionsList = document.getElementById("paper-sections-list");
+                const sectionsCount = document.getElementById("sections-count");
+                const sections = doc.sections || [];
+                sectionsCount.textContent = sections.length;
+
+                if (sections.length === 0) {
+                    sectionsList.innerHTML = `<p style="color: var(--text-muted);">No separate sections detected.</p>`;
+                } else {
+                    sectionsList.innerHTML = sections.map((sec, idx) => `
+                        <div class="section-card">
+                            <button type="button" class="section-header-btn" onclick="toggleSection(${idx})">
+                                <span>📑 ${escapeHtml(sec.section_name)}</span>
+                                <span id="sec-arrow-${idx}" style="font-size: 0.85rem; color: var(--primary);">▼ Collapse</span>
+                            </button>
+                            <div id="sec-body-${idx}" class="section-body">
+                                ${escapeHtml(sec.content || sec.preview || "")}
+                            </div>
+                        </div>
+                    `).join("");
+                }
+
+                loading.style.display = "none";
+                content.style.display = "block";
+
+            } catch (err) {
+                loading.style.display = "none";
+                errorMsg.textContent = err.message || "Failed to communicate with FastAPI backend.";
+                errorBox.style.display = "block";
+            }
+        });
+
+        function toggleSection(idx) {
+            const body = document.getElementById(`sec-body-${idx}`);
+            const arrow = document.getElementById(`sec-arrow-${idx}`);
+            if (body.style.display === "none") {
+                body.style.display = "block";
+                arrow.textContent = "▼ Collapse";
+            } else {
+                body.style.display = "none";
+                arrow.textContent = "▶ Expand";
+            }
+        }
+    </script>
 </body>
 </html>
