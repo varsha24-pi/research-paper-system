@@ -3,24 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Paper - Research Paper Intelligence System</title>
+    <title>Upload Paper - PaperIntel AI</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+    <!-- =======================================================================
+         1. Header & Navigation Bar
+         ======================================================================= -->
     <header class="navbar">
-        <div class="logo"><h2>📚 PaperIntel AI</h2></div>
+        <a href="index.html" class="brand-container">
+            <span class="brand-logo">📚</span>
+            <div>
+                <span class="brand-title">PaperIntel AI</span>
+                <span class="brand-subtitle">Research Paper Intelligence System</span>
+            </div>
+        </a>
+
         <nav>
-            <a href="index.html">Home</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="upload.html" class="active">Upload Paper</a>
-            <a href="search.html">Search</a>
-            <a href="papers.html">Paper Library</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="upload.html" class="active">Upload Paper</a></li>
+                <li><a href="search.html">Search</a></li>
+                <li><a href="papers.html">Paper Library</a></li>
+            </ul>
         </nav>
+
+        <div class="nav-right">
+            <div id="system-status" class="status-badge">
+                <span class="status-dot"></span>
+                <span id="status-text">Checking API...</span>
+            </div>
+            <div class="user-badge">
+                <span>👤</span>
+                <span>Demo Researcher</span>
+            </div>
+        </div>
     </header>
-    <main class="hero-section">
-        <h1>Upload Research Paper</h1>
-        <p>Select or drag and drop a PDF research paper to extract and index its contents.</p>
+
+    <!-- =======================================================================
+         2. Main Content: Upload Paper Card
+         ======================================================================= -->
+    <main class="main-content">
+        <div class="breadcrumb-nav">
+            <a href="dashboard.html">← Back to Dashboard</a>
+        </div>
+
+        <div class="upload-card">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">
+                    Upload Research Paper
+                </h1>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">
+                    Upload your academic PDF paper to extract text, segment sections, and extract domain keywords.
+                </p>
+            </div>
+
+            <!-- Upload Form -->
+            <form id="upload-form">
+                <!-- Drag and Drop Area -->
+                <div id="dropzone" class="dropzone">
+                    <input type="file" id="pdf-file-input" accept=".pdf,application/pdf" style="display: none;" />
+                    <span class="dropzone-icon">📄</span>
+                    <div class="dropzone-text">Drag & drop your research paper PDF here</div>
+                    <div class="dropzone-subtext">or click to browse files (Max: 50MB)</div>
+                </div>
+
+                <!-- Selected File Preview Box -->
+                <div id="file-preview" class="file-preview-card" style="display: none;">
+                    <div class="file-info">
+                        <span style="font-size: 1.5rem;">📑</span>
+                        <div>
+                            <div id="preview-filename" class="file-name">filename.pdf</div>
+                            <div id="preview-filesize" class="file-size">0 KB</div>
+                        </div>
+                    </div>
+                    <button type="button" id="remove-file-btn" class="remove-file-btn" title="Remove file">✕</button>
+                </div>
+
+                <!-- Optional Metadata Inputs -->
+                <div class="form-group">
+                    <label for="paper-title" class="form-label">Paper Title (Optional)</label>
+                    <input 
+                        type="text" 
+                        id="paper-title" 
+                        class="form-control" 
+                        placeholder="Leave blank to auto-detect from PDF metadata"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="paper-authors" class="form-label">Authors (Optional)</label>
+                    <input 
+                        type="text" 
+                        id="paper-authors" 
+                        class="form-control" 
+                        placeholder="e.g. Vaswani et al. (comma-separated)"
+                    />
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%; padding: 0.85rem;" disabled>
+                    <span>🚀 Ingest & Extract Intelligence</span>
+                </button>
+            </form>
+
+            <!-- Live Pipeline Processing Status -->
+            <div id="progress-box" class="progress-container">
+                <div class="progress-header">
+                    <span id="progress-status-label">Processing Pipeline...</span>
+                    <span id="progress-percentage">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                </div>
+                <ul class="pipeline-steps">
+                    <li id="step-1" class="pipeline-step">⏳ 1. Uploading PDF to local storage...</li>
+                    <li id="step-2" class="pipeline-step">⏳ 2. Extracting text & metadata with PyMuPDF...</li>
+                    <li id="step-3" class="pipeline-step">⏳ 3. Segmenting sections & computing TF-IDF keywords...</li>
+                    <li id="step-4" class="pipeline-step">⏳ 4. Storing structured records in MySQL...</li>
+                </ul>
+            </div>
+
+            <!-- Success Alert Box -->
+            <div id="success-alert" class="alert alert-success">
+                <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem;">
+                    🎉 Research Paper Processed Successfully!
+                </div>
+                <div id="success-details" style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem;"></div>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <a id="view-paper-link" href="viewer.html" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+                        📄 View Structured Paper
+                    </a>
+                    <a href="papers.html" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+                        📚 Open Library
+                    </a>
+                    <button type="button" id="upload-another-btn" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+                        + Upload Another
+                    </button>
+                </div>
+            </div>
+
+            <!-- Error Alert Box -->
+            <div id="error-alert" class="alert alert-error">
+                <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.35rem;">
+                    ⚠️ Upload Failed
+                </div>
+                <div id="error-message" style="font-size: 0.9rem;"></div>
+            </div>
+
+        </div>
     </main>
+
+    <!-- =======================================================================
+         3. Footer
+         ======================================================================= -->
+    <footer class="footer">
+        <p>AI-Powered Research Paper Intelligence System • College Minor Project</p>
+    </footer>
+
+    <!-- Client Script -->
     <script src="js/app.js"></script>
+    <script>
+        // =====================================================================
+        // Upload Page Interactive Logic (Vanilla JavaScript)
+        // =====================================================================
+        document.addEventListener("DOMContentLoaded", () => {
+            const dropzone = document.getElementById("dropzone");
+            const fileInput = document.getElementById("pdf-file-input");
+            const filePreview = document.getElementById("file-preview");
+            const previewFilename = document.getElementById("preview-filename");
+            const previewFilesize = document.getElementById("preview-filesize");
+            const removeFileBtn = document.getElementById("remove-file-btn");
+            const submitBtn = document.getElementById("submit-btn");
+            const form = document.getElementById("upload-form");
+
+            const progressBox = document.getElementById("progress-box");
+            const progressFill = document.getElementById("progress-bar-fill");
+            const progressPercent = document.getElementById("progress-percentage");
+            const progressLabel = document.getElementById("progress-status-label");
+
+            const successAlert = document.getElementById("success-alert");
+            const successDetails = document.getElementById("success-details");
+            const errorAlert = document.getElementById("error-alert");
+            const errorMessage = document.getElementById("error-message");
+            const viewPaperLink = document.getElementById("view-paper-link");
+            const uploadAnotherBtn = document.getElementById("upload-another-btn");
+
+            let selectedFile = null;
+
+            // Trigger file dialog on dropzone click
+            dropzone.addEventListener("click", () => fileInput.click());
+
+            // Drag and Drop Events
+            dropzone.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                dropzone.classList.add("dragover");
+            });
+
+            dropzone.addEventListener("dragleave", () => {
+                dropzone.classList.remove("dragover");
+            });
+
+            dropzone.addEventListener("drop", (e) => {
+                e.preventDefault();
+                dropzone.classList.remove("dragover");
+                if (e.dataTransfer.files.length > 0) {
+                    handleFileSelect(e.dataTransfer.files[0]);
+                }
+            });
+
+            // Input change event
+            fileInput.addEventListener("change", (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            function handleFileSelect(file) {
+                if (!file.name.toLowerCase().endsWith(".pdf")) {
+                    showError("Invalid file type. Please select a valid PDF (.pdf) research paper.");
+                    return;
+                }
+
+                selectedFile = file;
+                previewFilename.textContent = file.name;
+                previewFilesize.textContent = formatBytes(file.size);
+
+                dropzone.style.display = "none";
+                filePreview.style.display = "flex";
+                submitBtn.disabled = false;
+                hideAlerts();
+            }
+
+            // Remove file handler
+            removeFileBtn.addEventListener("click", () => {
+                selectedFile = null;
+                fileInput.value = "";
+                dropzone.style.display = "block";
+                filePreview.style.display = "none";
+                submitBtn.disabled = true;
+                hideAlerts();
+            });
+
+            uploadAnotherBtn.addEventListener("click", () => {
+                selectedFile = null;
+                fileInput.value = "";
+                document.getElementById("paper-title").value = "";
+                document.getElementById("paper-authors").value = "";
+                dropzone.style.display = "block";
+                filePreview.style.display = "none";
+                submitBtn.disabled = true;
+                hideAlerts();
+            });
+
+            // =================================================================
+            // Form Submission via fetch() -> POST /documents/upload
+            // =================================================================
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                if (!selectedFile) return;
+
+                hideAlerts();
+                submitBtn.disabled = true;
+                progressBox.style.display = "block";
+
+                // Animate progress pipeline
+                updateProgress(25, "Uploading PDF to server...", "step-1");
+
+                // Prepare FormData for multipart/form-data POST request
+                const formData = new FormData();
+                formData.append("file", selectedFile);
+
+                const titleVal = document.getElementById("paper-title").value.trim();
+                const authorsVal = document.getElementById("paper-authors").value.trim();
+                if (titleVal) formData.append("title", titleVal);
+                if (authorsVal) formData.append("authors", authorsVal);
+
+                try {
+                    // Step 2 progress
+                    setTimeout(() => updateProgress(50, "Extracting text with PyMuPDF...", "step-2"), 400);
+                    setTimeout(() => updateProgress(75, "Segmenting sections & TF-IDF keywords...", "step-3"), 800);
+
+                    // Send asynchronous HTTP POST request to FastAPI backend
+                    const response = await fetch(`${API_BASE_URL}/documents/upload`, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.detail || `Upload failed with HTTP ${response.status}`);
+                    }
+
+                    // Step 4 Complete
+                    updateProgress(100, "Stored in MySQL successfully!", "step-4");
+
+                    setTimeout(() => {
+                        progressBox.style.display = "none";
+                        showSuccess(data);
+                    }, 500);
+
+                } catch (error) {
+                    progressBox.style.display = "none";
+                    submitBtn.disabled = false;
+                    showError(error.message || "Failed to communicate with the server.");
+                }
+            });
+
+            function updateProgress(percent, label, activeStepId) {
+                progressFill.style.width = `${percent}%`;
+                progressPercent.textContent = `${percent}%`;
+                progressLabel.textContent = label;
+
+                const stepIds = ["step-1", "step-2", "step-3", "step-4"];
+                const targetIdx = stepIds.indexOf(activeStepId);
+
+                stepIds.forEach((id, idx) => {
+                    const el = document.getElementById(id);
+                    if (idx < targetIdx) {
+                        el.className = "pipeline-step done";
+                    } else if (idx === targetIdx) {
+                        el.className = "pipeline-step active";
+                    } else {
+                        el.className = "pipeline-step";
+                    }
+                });
+            }
+
+            function showSuccess(data) {
+                successDetails.innerHTML = `
+                    <p><strong>Document ID:</strong> #${data.document_id}</p>
+                    <p><strong>Title:</strong> ${escapeHtml(data.title)}</p>
+                    <p><strong>Pages:</strong> ${data.total_pages} (${data.total_words} words)</p>
+                    <p><strong>Sections Parsed (${data.sections_count}):</strong> ${data.sections.map(s => `<code>${escapeHtml(s)}</code>`).join(", ")}</p>
+                    <p><strong>Top Keywords Extracted:</strong> ${data.keywords.map(k => `<span class="tag">🏷️ ${escapeHtml(k)}</span>`).join(" ")}</p>
+                `;
+                viewPaperLink.href = `viewer.html?id=${data.document_id}`;
+                successAlert.style.display = "block";
+                successAlert.scrollIntoView({ behavior: "smooth" });
+            }
+
+            function showError(msg) {
+                errorMessage.textContent = msg;
+                errorAlert.style.display = "block";
+                errorAlert.scrollIntoView({ behavior: "smooth" });
+            }
+
+            function hideAlerts() {
+                successAlert.style.display = "none";
+                errorAlert.style.display = "none";
+            }
+        });
+    </script>
 </body>
 </html>

@@ -599,3 +599,208 @@ body {
         width: 100%;
     }
 }
+
+/* =============================================================================
+   9. Upload Page & Form Components
+   ============================================================================= */
+.upload-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    max-width: 720px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-sm);
+}
+
+.dropzone {
+    border: 2px dashed #93c5fd;
+    background-color: #f8fafc;
+    border-radius: var(--radius-md);
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 1.5rem;
+}
+
+.dropzone:hover, .dropzone.dragover {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+    transform: scale(1.01);
+}
+
+.dropzone-icon {
+    font-size: 3.5rem;
+    color: var(--primary);
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.dropzone-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+}
+
+.dropzone-subtext {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.file-preview-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f1f5f9;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.file-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
+
+.file-size {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.remove-file-btn {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.25rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    margin-bottom: 0.4rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Pipeline Status / Progress Box */
+.progress-container {
+    margin-top: 1.5rem;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    display: none;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background-color: #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--primary);
+    border-radius: 9999px;
+    transition: width 0.3s ease;
+}
+
+.pipeline-steps {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.pipeline-step.active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.pipeline-step.done {
+    color: var(--success);
+}
+
+/* Alert Boxes */
+.alert {
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md);
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+    display: none;
+}
+
+.alert-success {
+    background-color: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+}
+
+.alert-error {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.breadcrumb-nav {
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.breadcrumb-nav a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.breadcrumb-nav a:hover {
+    text-decoration: underline;
+}
+
