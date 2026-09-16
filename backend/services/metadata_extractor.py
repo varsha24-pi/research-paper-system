@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 
@@ -166,7 +166,7 @@ class MetadataExtractor:
         """
         Extracts publication year from embedded date or regex scanning for 4-digit years (1970 - 2026).
         """
-        current_year = datetime.utcnow().year
+        current_year = datetime.now(timezone.utc).year
 
         # 1. Check embedded creation date (e.g., 'D:20230515120000')
         creation_date = str(pdf_metadata.get("creation_date") or "")

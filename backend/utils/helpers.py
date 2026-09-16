@@ -1,7 +1,7 @@
 import os
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import UploadFile, HTTPException, status
 
 ALLOWED_EXTENSIONS = {".pdf"}
@@ -24,7 +24,7 @@ def generate_unique_filename(original_filename: str) -> str:
     Generates a secure, unique filename using timestamp and UUID to prevent collisions.
     Example: 20260916_143000_a1b2c3d4_my_paper.pdf
     """
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     short_uuid = uuid.uuid4().hex[:8]
     clean_original = sanitize_filename(original_filename)
     return f"{timestamp}_{short_uuid}_{clean_original}"

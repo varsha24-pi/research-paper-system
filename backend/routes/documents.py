@@ -124,7 +124,7 @@ async def upload_document(
             authors=processed_data["authors"],
             publication_year=processed_data["publication_year"],
             file_name=file.filename,
-            file_path=str(destination_path),
+            file_path=destination_path.as_posix(),
             file_size_bytes=file_size,
             total_pages=extraction_data.get("total_pages", 0),
             abstract=processed_data.get("abstract"),
