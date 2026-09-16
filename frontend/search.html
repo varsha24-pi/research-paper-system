@@ -3,24 +3,432 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search - Research Paper Intelligence System</title>
+    <title>Search Papers - PaperIntel AI</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Dedicated styles for search page */
+        .search-page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .search-page-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .query-chips {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            align-items: center;
+        }
+
+        .chip-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .chip {
+            background-color: #f1f5f9;
+            color: var(--secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chip:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-color: #bfdbfe;
+        }
+
+        .results-meta-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .highlight {
+            background-color: #fef08a;
+            color: #854d0e;
+            font-weight: 600;
+            padding: 0 0.2rem;
+            border-radius: 2px;
+        }
+
+        .search-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+        }
+
+        .search-card:hover {
+            border-color: #93c5fd;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .search-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .search-card-title:hover {
+            color: var(--primary);
+        }
+
+        .search-card-snippet {
+            font-size: 0.92rem;
+            color: #334155;
+            background-color: #f8fafc;
+            border-left: 3px solid var(--primary);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            margin: 0.85rem 0;
+            line-height: 1.6;
+        }
+
+        .search-card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #f1f5f9;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-results-box {
+            text-align: center;
+            padding: 3.5rem 1.5rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            color: var(--text-muted);
+        }
+    </style>
 </head>
 <body>
+
+    <!-- =======================================================================
+         1. Header & Navigation Bar
+         ======================================================================= -->
     <header class="navbar">
-        <div class="logo"><h2>📚 PaperIntel AI</h2></div>
+        <a href="index.html" class="brand-container">
+            <span class="brand-logo">📚</span>
+            <div>
+                <span class="brand-title">PaperIntel AI</span>
+                <span class="brand-subtitle">Research Paper Intelligence System</span>
+            </div>
+        </a>
+
         <nav>
-            <a href="index.html">Home</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="upload.html">Upload Paper</a>
-            <a href="search.html" class="active">Search</a>
-            <a href="papers.html">Paper Library</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="upload.html">Upload Paper</a></li>
+                <li><a href="search.html" class="active">Search</a></li>
+                <li><a href="papers.html">Paper Library</a></li>
+            </ul>
         </nav>
+
+        <div class="nav-right">
+            <div id="system-status" class="status-badge">
+                <span class="status-dot"></span>
+                <span id="status-text">Checking API...</span>
+            </div>
+            <div class="user-badge">
+                <span>👤</span>
+                <span>Demo Researcher</span>
+            </div>
+        </div>
     </header>
-    <main class="hero-section">
-        <h1>Intelligent Paper Search</h1>
-        <p>Search across titles, abstracts, extracted sections, and AI keywords.</p>
+
+    <!-- =======================================================================
+         2. Main Content: Search Section
+         ======================================================================= -->
+    <main class="main-content">
+        <div class="breadcrumb-nav">
+            <a href="dashboard.html">← Back to Dashboard</a>
+        </div>
+
+        <section class="search-page-header">
+            <h1>🔍 Intelligent Research Paper Search</h1>
+            <p style="color: var(--text-muted); font-size: 1rem; max-width: 650px; margin: 0 auto;">
+                Search across paper titles, abstracts, structural sections, and extracted NLP keywords with transparent relevance ranking.
+            </p>
+
+            <!-- Search Form -->
+            <div class="search-box-container" style="margin-top: 1.5rem; margin-bottom: 1rem;">
+                <form id="search-page-form" class="search-form">
+                    <input 
+                        type="text" 
+                        id="search-query-input" 
+                        class="search-input" 
+                        placeholder="Search by keywords, topics, or methodology (e.g. 'transformer', 'attention mechanism')..."
+                        required
+                        autofocus
+                    />
+                    <button type="submit" class="search-btn">
+                        <span>🔍 Search</span>
+                    </button>
+                </form>
+
+                <!-- Quick Query Suggestions Chips -->
+                <div class="query-chips">
+                    <span class="chip-label">Try searching:</span>
+                    <button type="button" class="chip" data-query="attention">attention</button>
+                    <button type="button" class="chip" data-query="transformer networks">transformer networks</button>
+                    <button type="button" class="chip" data-query="neural network">neural network</button>
+                    <button type="button" class="chip" data-query="convolutional vision">convolutional vision</button>
+                    <button type="button" class="chip" data-query="deep learning">deep learning</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================
+             3. Search Results Display Section
+             =================================================================== -->
+        <section id="search-results-section" style="max-width: 900px; margin: 0 auto;">
+            <!-- Results Meta Info (Count, Query, Latency) -->
+            <div id="results-meta-bar" class="results-meta-bar" style="display: none;">
+                <span id="results-count-text">Found 0 results</span>
+                <span id="query-tokens-text" style="font-size: 0.82rem;"></span>
+            </div>
+
+            <!-- Results Cards Container -->
+            <div id="results-container">
+                <div class="empty-results-box">
+                    <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">🔎</span>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">
+                        Ready to search research papers
+                    </h3>
+                    <p style="font-size: 0.95rem; max-width: 500px; margin: 0 auto 1.25rem;">
+                        Enter any keyword, research topic, or author name above, or click one of the suggestion chips to start searching.
+                    </p>
+                </div>
+            </div>
+        </section>
     </main>
+
+    <!-- =======================================================================
+         4. Footer
+         ======================================================================= -->
+    <footer class="footer">
+        <p>AI-Powered Research Paper Intelligence System • College Minor Project</p>
+    </footer>
+
+    <!-- Client Script -->
     <script src="js/app.js"></script>
+    <script>
+        // =====================================================================
+        // Search Page Interactive Logic (Vanilla JavaScript)
+        // =====================================================================
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("search-page-form");
+            const input = document.getElementById("search-query-input");
+            const resultsContainer = document.getElementById("results-container");
+            const metaBar = document.getElementById("results-meta-bar");
+            const countText = document.getElementById("results-count-text");
+            const tokensText = document.getElementById("query-tokens-text");
+            const chips = document.querySelectorAll(".chip");
+
+            // Check if URL has ?q= query parameter (e.g. from homepage search)
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialQuery = urlParams.get("q") || urlParams.get("query");
+            if (initialQuery) {
+                input.value = initialQuery;
+                executeSearch(initialQuery);
+            }
+
+            // Suggestion chips click handler
+            chips.forEach(chip => {
+                chip.addEventListener("click", () => {
+                    const q = chip.getAttribute("data-query");
+                    input.value = q;
+                    executeSearch(q);
+                });
+            });
+
+            // Form submit handler
+            form.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const q = input.value.trim();
+                if (q) {
+                    executeSearch(q);
+                }
+            });
+
+            // =================================================================
+            // Execute Search via fetch() -> GET /search/?q=...
+            // =================================================================
+            async function executeSearch(query) {
+                // Update browser URL without reloading
+                const newUrl = `${window.location.pathname}?q=${encodeURIComponent(query)}`;
+                window.history.replaceState({ path: newUrl }, "", newUrl);
+
+                metaBar.style.display = "none";
+                resultsContainer.innerHTML = `
+                    <div class="loading-spinner">
+                        <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">⏳</span>
+                        <p>Searching research paper index and calculating relevance scores...</p>
+                    </div>
+                `;
+
+                try {
+                    const startTime = performance.now();
+                    const response = await fetch(`${API_BASE_URL}/search/?q=${encodeURIComponent(query)}`);
+                    const durationMs = Math.round(performance.now() - startTime);
+
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.detail || `Search failed with HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    const results = data.results || [];
+                    const tokens = data.query_tokens || [];
+
+                    // Render Meta Bar
+                    metaBar.style.display = "flex";
+                    countText.textContent = `Found ${results.length} result(s) in ${durationMs}ms`;
+                    tokensText.innerHTML = tokens.length > 0
+                        ? `Filtered query tokens: <code>${tokens.map(escapeHtml).join(", ")}</code>`
+                        : "";
+
+                    // Zero Results Found State
+                    if (results.length === 0) {
+                        resultsContainer.innerHTML = `
+                            <div class="empty-results-box">
+                                <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">📭</span>
+                                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">
+                                    No matching research papers found
+                                </h3>
+                                <p style="font-size: 0.95rem; margin-bottom: 1.25rem;">
+                                    We couldn't find any documents matching <strong>"${escapeHtml(query)}"</strong>.
+                                </p>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); text-align: left; max-width: 400px; margin: 0 auto; background: #f8fafc; padding: 1rem; border-radius: var(--radius-sm);">
+                                    <strong>Suggestions:</strong>
+                                    <ul style="margin-left: 1.2rem; margin-top: 0.35rem;">
+                                        <li>Check your search term for typos.</li>
+                                        <li>Try broader keywords (e.g. "neural", "vision", "model").</li>
+                                        <li>Ensure papers have been uploaded into the system.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    // Render Result Cards
+                    resultsContainer.innerHTML = results.map(item => {
+                        const highlightedSnippet = highlightText(item.snippet, tokens);
+
+                        return `
+                            <div class="search-card">
+                                <div class="search-card-header">
+                                    <a href="viewer.html?id=${item.document_id}" class="search-card-title">
+                                        📄 ${escapeHtml(item.title)}
+                                    </a>
+                                    <span class="score-badge" title="Multi-field relevance score">
+                                        ⭐ Relevance: ${item.score}
+                                    </span>
+                                </div>
+
+                                <div class="paper-meta">
+                                    <span>✍️ ${escapeHtml(item.authors || "Authors not specified")}</span>
+                                    <span>📑 ${item.total_pages} Page(s)</span>
+                                    ${item.publication_year ? `<span>📅 Year: ${item.publication_year}</span>` : ""}
+                                    <span>🕒 Uploaded: ${formatDate(item.uploaded_at)}</span>
+                                </div>
+
+                                ${item.snippet ? `
+                                    <div class="search-card-snippet">
+                                        "...${highlightedSnippet}..."
+                                    </div>
+                                ` : ""}
+
+                                <div class="search-card-actions">
+                                    <div class="tag-list">
+                                        ${item.matched_keywords && item.matched_keywords.length > 0 ? (
+                                            item.matched_keywords.map(k => `<span class="tag">✓ ${escapeHtml(k)}</span>`).join("")
+                                        ) : `<span style="font-size: 0.8rem; color: var(--text-muted);">Title / Body Match</span>`}
+                                    </div>
+
+                                    <a href="viewer.html?id=${item.document_id}" class="btn btn-primary" style="padding: 0.45rem 1rem; font-size: 0.85rem;">
+                                        View Structured Paper →
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    }).join("");
+
+                } catch (error) {
+                    metaBar.style.display = "none";
+                    resultsContainer.innerHTML = `
+                        <div class="alert alert-error" style="display: block;">
+                            <p><strong>Search Error:</strong> ${escapeHtml(error.message)}</p>
+                            <p style="font-size: 0.85rem; margin-top: 0.25rem;">
+                                Please ensure the FastAPI backend is running at <code>http://127.0.0.1:8000</code>.
+                            </p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Helper to highlight matching tokens in snippet
+            function highlightText(text, tokens) {
+                if (!text || !tokens || tokens.length === 0) return escapeHtml(text);
+                let escaped = escapeHtml(text);
+
+                tokens.forEach(token => {
+                    if (token.length < 2) return;
+                    const regex = new RegExp(`(${escapeRegExp(token)})`, "gi");
+                    escaped = escaped.replace(regex, `<span class="highlight">$1</span>`);
+                });
+
+                return escaped;
+            }
+
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+        });
+    </script>
 </body>
 </html>
