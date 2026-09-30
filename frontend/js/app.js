@@ -9,13 +9,94 @@ const API_BASE_URL = "http://127.0.0.1:8000";
 // 1. Initialization on DOM Content Loaded
 // =============================================================================
 document.addEventListener("DOMContentLoaded", () => {
+    initAuthUI();
     checkSystemHealth();
     loadDashboardStatsAndRecentPapers();
     initHeroSearchForm();
 });
 
 // =============================================================================
-// 2. Health Check Indicator
+// 2. Authentication & User Session Management
+// =============================================================================
+function getAuthToken() {
+    return localStorage.getItem("access_token");
+}
+
+function getCurrentUser() {
+    const token = getAuthToken();
+    if (!token) return null;
+    return {
+        id: localStorage.getItem("user_id"),
+        username: localStorage.getItem("username"),
+        full_name: localStorage.getItem("full_name") || localStorage.getItem("username") || "Researcher",
+        email: localStorage.getItem("email")
+    };
+}
+
+function logoutUser() {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("username");
+    localStorage.removeItem("full_name");
+    localStorage.removeItem("email");
+    window.location.href = "login.html";
+}
+
+function requireAuth(redirectUrl = window.location.pathname) {
+    if (!getAuthToken()) {
+        window.location.href = `login.html?redirect=${encodeURIComponent(redirectUrl)}`;
+        return false;
+    }
+    return true;
+}
+
+function initAuthUI() {
+    const navRight = document.querySelector(".nav-right");
+    if (!navRight) return;
+
+    // Remove any existing user widget
+    const existingUserBadge = navRight.querySelector(".user-badge, .auth-nav-btn");
+    if (existingUserBadge) existingUserBadge.remove();
+
+    const user = getCurrentUser();
+
+    if (user) {
+        // Logged in user UI
+        const userContainer = document.createElement("div");
+        userContainer.className = "user-badge";
+        userContainer.style.display = "inline-flex";
+        userContainer.style.alignItems = "center";
+        userContainer.style.gap = "0.6rem";
+        userContainer.innerHTML = `
+            <span style="cursor: pointer;" title="Username: ${escapeHtml(user.username)}">👤 ${escapeHtml(user.full_name)}</span>
+            <button type="button" id="logout-btn" style="background: none; border: none; color: var(--danger); font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 0.1rem 0.35rem; border-radius: 4px;" title="Sign out of account">
+                🚪 Logout
+            </button>
+        `;
+        navRight.appendChild(userContainer);
+
+        const logoutBtn = document.getElementById("logout-btn");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", () => {
+                if (confirm("Are you sure you want to sign out?")) {
+                    logoutUser();
+                }
+            });
+        }
+    } else {
+        // Logged out / Guest UI
+        const loginBtn = document.createElement("a");
+        loginBtn.href = "login.html";
+        loginBtn.className = "btn btn-primary auth-nav-btn";
+        loginBtn.style.padding = "0.35rem 0.85rem";
+        loginBtn.style.fontSize = "0.85rem";
+        loginBtn.innerHTML = `🔑 Sign In / Register`;
+        navRight.appendChild(loginBtn);
+    }
+}
+
+// =============================================================================
+// 3. Health Check Indicator
 // =============================================================================
 async function checkSystemHealth() {
     const statusBadge = document.getElementById("system-status");
@@ -39,7 +120,7 @@ async function checkSystemHealth() {
 }
 
 // =============================================================================
-// 3. Load Stats & Recent Uploaded Papers
+// 4. Load Stats & Recent Uploaded Papers
 // =============================================================================
 async function loadDashboardStatsAndRecentPapers() {
     const papersContainer = document.getElementById("papers-list-container");
@@ -107,7 +188,7 @@ async function loadDashboardStatsAndRecentPapers() {
 }
 
 // =============================================================================
-// 4. Hero Live Search Form Handler
+// 5. Hero Live Search Form Handler
 // =============================================================================
 function initHeroSearchForm() {
     const form = document.getElementById("hero-search-form");
@@ -159,7 +240,7 @@ function initHeroSearchForm() {
                         <a href="viewer.html?id=${item.document_id}" class="paper-item-title">
                             📄 ${escapeHtml(item.title)}
                         </a>
-                        <span class="score-badge">Relevance: ${item.score}</span>
+                        <span class="score-badge">Relevance: ${item.score} ${item.relevance_percentage ? `(${item.relevance_percentage})` : ''}</span>
                     </div>
 
                     <div class="paper-meta">
@@ -196,7 +277,7 @@ function initHeroSearchForm() {
 }
 
 // =============================================================================
-// 5. Helper Formatting Functions
+// 6. Helper Formatting Functions
 // =============================================================================
 function escapeHtml(str) {
     if (!str) return "";
@@ -209,7 +290,7 @@ function escapeHtml(str) {
 }
 
 function formatBytes(bytes) {
-    if (bytes === 0) return "0 B";
+    if (!bytes || bytes === 0) return "0 B";
     const k = 1024;
     const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));

@@ -35,10 +35,6 @@
                 <span class="status-dot"></span>
                 <span id="status-text">Checking API...</span>
             </div>
-            <div class="user-badge">
-                <span>👤</span>
-                <span>Demo Researcher</span>
-            </div>
         </div>
     </header>
 
@@ -62,6 +58,12 @@
 
             <!-- Upload Form -->
             <form id="upload-form">
+                <!-- User Auth Status Banner -->
+                <div id="upload-auth-banner" style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.65rem 1rem; margin-bottom: 1.5rem; font-size: 0.88rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span id="upload-auth-text">💡 You are uploading as Guest.</span>
+                    <a id="upload-auth-link" href="login.html?redirect=upload.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Sign In or Register →</a>
+                </div>
+
                 <!-- Drag and Drop Area -->
                 <div id="dropzone" class="dropzone">
                     <input type="file" id="pdf-file-input" accept=".pdf,application/pdf" style="display: none;" />
@@ -191,6 +193,18 @@
             const viewPaperLink = document.getElementById("view-paper-link");
             const uploadAnotherBtn = document.getElementById("upload-another-btn");
 
+            const uploadAuthText = document.getElementById("upload-auth-text");
+            const uploadAuthLink = document.getElementById("upload-auth-link");
+            const currentUser = getCurrentUser();
+
+            if (currentUser) {
+                uploadAuthText.innerHTML = `👤 Logged in as: <strong>${escapeHtml(currentUser.full_name)}</strong> (paper will be saved to your library)`;
+                uploadAuthLink.style.display = "none";
+            } else {
+                uploadAuthText.innerHTML = `💡 You are not signed in.`;
+                uploadAuthLink.textContent = "Sign In or Register →";
+            }
+
             let selectedFile = null;
 
             // Trigger file dialog on dropzone click
@@ -286,9 +300,17 @@
                     setTimeout(() => updateProgress(50, "Extracting text with PyMuPDF...", "step-2"), 400);
                     setTimeout(() => updateProgress(75, "Segmenting sections & TF-IDF keywords...", "step-3"), 800);
 
+                    // Prepare headers (including JWT token if user is signed in)
+                    const uploadHeaders = {};
+                    const token = getAuthToken();
+                    if (token) {
+                        uploadHeaders["Authorization"] = `Bearer ${token}`;
+                    }
+
                     // Send asynchronous HTTP POST request to FastAPI backend
                     const response = await fetch(`${API_BASE_URL}/documents/upload`, {
                         method: "POST",
+                        headers: uploadHeaders,
                         body: formData
                     });
 

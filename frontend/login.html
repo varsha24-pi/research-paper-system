@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Researcher Authentication - PaperIntel AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .auth-container {
+            max-width: 480px;
+            margin: 3rem auto 4rem;
+            padding: 0 1rem;
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .auth-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            padding: 0.75rem 0;
+            background: none;
+            border: none;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .auth-tab-btn.active {
+            color: var(--primary);
+        }
+
+        .auth-tab-btn.active::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 9999px;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <a href="index.html" class="brand-container">
+            <span class="brand-logo">📚</span>
+            <div>
+                <span class="brand-title">PaperIntel AI</span>
+                <span class="brand-subtitle">Research Paper Intelligence System</span>
+            </div>
+        </a>
+
+        <div class="nav-right">
+            <div id="system-status" class="status-badge">
+                <span class="status-dot"></span>
+                <span id="status-text">Checking API...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="auth-container">
+        <div class="auth-card">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">🔐</span>
+                <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--text-main);">
+                    Researcher Portal
+                </h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">
+                    Sign in or register to manage and ingest research papers.
+                </p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button type="button" id="tab-login" class="auth-tab-btn active" onclick="switchTab('login')">
+                    Sign In
+                </button>
+                <button type="button" id="tab-register" class="auth-tab-btn" onclick="switchTab('register')">
+                    Register
+                </button>
+            </div>
+
+            <!-- Alerts -->
+            <div id="auth-alert" class="alert" style="margin-bottom: 1.25rem; margin-top: 0;"></div>
+
+            <!-- LOGIN FORM -->
+            <form id="login-form" class="auth-form active">
+                <div class="form-group">
+                    <label for="login-username" class="form-label">Username or Email</label>
+                    <input 
+                        type="text" 
+                        id="login-username" 
+                        class="form-control" 
+                        placeholder="e.g. researcher_alex or email@univ.edu" 
+                        required 
+                        autofocus
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password" class="form-label">Password</label>
+                    <input 
+                        type="password" 
+                        id="login-password" 
+                        class="form-control" 
+                        placeholder="Enter your password" 
+                        required 
+                    />
+                </div>
+
+                <button type="submit" id="login-btn" class="btn btn-primary" style="width: 100%; padding: 0.85rem; margin-top: 0.5rem;">
+                    🚀 Sign In to Account
+                </button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="register-form" class="auth-form">
+                <div class="form-group">
+                    <label for="reg-fullname" class="form-label">Full Name & Title</label>
+                    <input 
+                        type="text" 
+                        id="reg-fullname" 
+                        class="form-control" 
+                        placeholder="e.g. Dr. Alex Morgan" 
+                        required 
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-username" class="form-label">Username</label>
+                    <input 
+                        type="text" 
+                        id="reg-username" 
+                        class="form-control" 
+                        placeholder="e.g. alex_morgan" 
+                        minlength="3" 
+                        required 
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-email" class="form-label">Institutional Email</label>
+                    <input 
+                        type="email" 
+                        id="reg-email" 
+                        class="form-control" 
+                        placeholder="alex@university.edu" 
+                        required 
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-password" class="form-label">Password</label>
+                    <input 
+                        type="password" 
+                        id="reg-password" 
+                        class="form-control" 
+                        placeholder="At least 6 characters" 
+                        minlength="6" 
+                        required 
+                    />
+                    <div class="form-hint">Stored securely using bcrypt with 12-round salt.</div>
+                </div>
+
+                <button type="submit" id="reg-btn" class="btn btn-primary" style="width: 100%; padding: 0.85rem; margin-top: 0.5rem;">
+                    ✨ Create Researcher Account
+                </button>
+            </form>
+
+            <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+                <a href="index.html" style="color: var(--primary); text-decoration: none; font-weight: 500;">
+                    ← Return to Home Page
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>AI-Powered Research Paper Intelligence System • College Minor Project</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        const alertBox = document.getElementById("auth-alert");
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlParams.get("redirect") || "dashboard.html";
+
+        // Check if user opened with tab=register
+        if (urlParams.get("tab") === "register") {
+            switchTab("register");
+        }
+
+        function switchTab(tab) {
+            hideAlert();
+            const tabLogin = document.getElementById("tab-login");
+            const tabRegister = document.getElementById("tab-register");
+            const formLogin = document.getElementById("login-form");
+            const formRegister = document.getElementById("register-form");
+
+            if (tab === "login") {
+                tabLogin.classList.add("active");
+                tabRegister.classList.remove("active");
+                formLogin.classList.add("active");
+                formRegister.classList.remove("active");
+            } else {
+                tabRegister.classList.add("active");
+                tabLogin.classList.remove("active");
+                formRegister.classList.add("active");
+                formLogin.classList.remove("active");
+            }
+        }
+
+        function showAlert(msg, isSuccess = false) {
+            alertBox.className = isSuccess ? "alert alert-success" : "alert alert-error";
+            alertBox.textContent = msg;
+            alertBox.style.display = "block";
+        }
+
+        function hideAlert() {
+            alertBox.style.display = "none";
+        }
+
+        // Handle Login Submission
+        document.getElementById("login-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            hideAlert();
+
+            const username = document.getElementById("login-username").value.trim();
+            const password = document.getElementById("login-password").value;
+            const btn = document.getElementById("login-btn");
+
+            btn.disabled = true;
+            btn.textContent = "Authenticating...";
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "Authentication failed. Check your username and password.");
+                }
+
+                // Store user session in localStorage
+                localStorage.setItem("access_token", data.access_token);
+                localStorage.setItem("user_id", data.user_id);
+                localStorage.setItem("username", data.username);
+                localStorage.setItem("full_name", data.full_name);
+                localStorage.setItem("email", data.email);
+
+                showAlert(`Welcome back, ${data.full_name}! Redirecting...`, true);
+
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 800);
+
+            } catch (err) {
+                btn.disabled = false;
+                btn.textContent = "🚀 Sign In to Account";
+                showAlert(err.message);
+            }
+        });
+
+        // Handle Registration Submission
+        document.getElementById("register-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            hideAlert();
+
+            const full_name = document.getElementById("reg-fullname").value.trim();
+            const username = document.getElementById("reg-username").value.trim();
+            const email = document.getElementById("reg-email").value.trim();
+            const password = document.getElementById("reg-password").value;
+            const btn = document.getElementById("reg-btn");
+
+            btn.disabled = true;
+            btn.textContent = "Creating Account...";
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, email, password, full_name })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "Registration failed.");
+                }
+
+                showAlert("Account created successfully! Signing you in...", true);
+
+                // Auto login
+                const loginRes = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (loginRes.ok) {
+                    const loginData = await loginRes.json();
+                    localStorage.setItem("access_token", loginData.access_token);
+                    localStorage.setItem("user_id", loginData.user_id);
+                    localStorage.setItem("username", loginData.username);
+                    localStorage.setItem("full_name", loginData.full_name);
+                    localStorage.setItem("email", loginData.email);
+
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 1000);
+                } else {
+                    switchTab("login");
+                    document.getElementById("login-username").value = username;
+                    showAlert("Account created! Please sign in with your password.", true);
+                }
+
+            } catch (err) {
+                btn.disabled = false;
+                btn.textContent = "✨ Create Researcher Account";
+                showAlert(err.message);
+            }
+        });
+    </script>
+</body>
+</html>
