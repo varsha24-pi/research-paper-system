@@ -68,9 +68,13 @@ function initAuthUI() {
         userContainer.style.alignItems = "center";
         userContainer.style.gap = "0.6rem";
         userContainer.innerHTML = `
-            <span style="cursor: pointer;" title="Username: ${escapeHtml(user.username)}">👤 ${escapeHtml(user.full_name)}</span>
-            <button type="button" id="logout-btn" style="background: none; border: none; color: var(--danger); font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 0.1rem 0.35rem; border-radius: 4px;" title="Sign out of account">
-                🚪 Logout
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer;" title="Username: ${escapeHtml(user.username)}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                ${escapeHtml(user.full_name)}
+            </span>
+            <button type="button" id="logout-btn" style="background: none; border: none; color: var(--danger); font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 0.15rem 0.4rem; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.25rem;" title="Sign out of account">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Logout
             </button>
         `;
         navRight.appendChild(userContainer);
@@ -90,7 +94,13 @@ function initAuthUI() {
         loginBtn.className = "btn btn-primary auth-nav-btn";
         loginBtn.style.padding = "0.35rem 0.85rem";
         loginBtn.style.fontSize = "0.85rem";
-        loginBtn.innerHTML = `🔑 Sign In / Register`;
+        loginBtn.style.display = "inline-flex";
+        loginBtn.style.alignItems = "center";
+        loginBtn.style.gap = "0.35rem";
+        loginBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Sign In / Register
+        `;
         navRight.appendChild(loginBtn);
     }
 }
@@ -144,10 +154,16 @@ async function loadDashboardStatsAndRecentPapers() {
 
         if (papers.length === 0) {
             papersContainer.innerHTML = `
-                <div style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
-                    <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">📂 No research papers indexed yet.</p>
-                    <p style="font-size: 0.9rem; margin-bottom: 1.25rem;">Upload your first PDF paper to extract sections and keywords.</p>
-                    <a href="upload.html" class="btn btn-primary">Upload Paper Now</a>
+                <div style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted);">
+                    <div style="width: 48px; height: 48px; margin: 0 auto 1rem; border-radius: 50%; background: var(--primary-subtle); color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    </div>
+                    <p style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;">No research papers indexed yet</p>
+                    <p style="font-size: 0.88rem; margin-bottom: 1.25rem;">Upload your first PDF paper to extract sections and keywords.</p>
+                    <a href="upload.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        Upload Paper Now
+                    </a>
                 </div>
             `;
             return;
@@ -157,17 +173,29 @@ async function loadDashboardStatsAndRecentPapers() {
         papersContainer.innerHTML = papers.map(paper => `
             <div class="paper-item">
                 <a href="viewer.html?id=${paper.id}" class="paper-item-title">
-                    📄 ${escapeHtml(paper.title || paper.filename)}
+                    ${escapeHtml(paper.title || paper.filename)}
                 </a>
                 <div class="paper-meta">
-                    <span>✍️ ${escapeHtml(paper.authors || "Authors not specified")}</span>
-                    <span>📑 ${paper.total_pages || 1} Page(s)</span>
-                    <span>📦 ${formatBytes(paper.file_size_bytes || 0)}</span>
-                    <span>🕒 ${formatDate(paper.uploaded_at)}</span>
+                    <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        ${escapeHtml(paper.authors || "Authors not specified")}
+                    </span>
+                    <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        ${paper.total_pages || 1} Page${(paper.total_pages || 1) === 1 ? '' : 's'}
+                    </span>
+                    <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                        ${formatBytes(paper.file_size_bytes || 0)}
+                    </span>
+                    <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        ${formatDate(paper.uploaded_at)}
+                    </span>
                 </div>
                 ${paper.keywords && paper.keywords.length > 0 ? `
                     <div class="tag-list">
-                        ${paper.keywords.map(k => `<span class="tag">🏷️ ${escapeHtml(k)}</span>`).join("")}
+                        ${paper.keywords.slice(0, 5).map(k => `<span class="tag">${escapeHtml(k)}</span>`).join("")}
                     </div>
                 ` : ""}
             </div>
@@ -176,8 +204,8 @@ async function loadDashboardStatsAndRecentPapers() {
     } catch (error) {
         if (papersContainer) {
             papersContainer.innerHTML = `
-                <div style="text-align: center; padding: 1.5rem; color: var(--danger);">
-                    <p>⚠️ Unable to connect to FastAPI backend.</p>
+                <div style="text-align: center; padding: 2rem; color: var(--danger);">
+                    <p style="font-weight: 700;">Unable to connect to FastAPI backend.</p>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
                         Make sure your backend is running at <code>http://127.0.0.1:8000</code>.
                     </p>
@@ -204,12 +232,12 @@ function initHeroSearchForm() {
         if (!query) return;
 
         if (sectionTitle) {
-            sectionTitle.textContent = `🔍 Search Results for: "${query}"`;
+            sectionTitle.textContent = `Search Results for: "${query}"`;
         }
 
         if (papersContainer) {
             papersContainer.innerHTML = `
-                <p style="text-align: center; color: var(--text-muted); padding: 1.5rem;">
+                <p style="text-align: center; color: var(--text-muted); padding: 2rem;">
                     Searching research papers...
                 </p>
             `;
@@ -224,10 +252,10 @@ function initHeroSearchForm() {
 
             if (results.length === 0) {
                 papersContainer.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                        <p style="font-size: 1.1rem; font-weight: 600;">No matching research papers found.</p>
-                        <p style="font-size: 0.9rem; margin-top: 0.35rem;">
-                            Try broader keywords like "attention", "network", "transformer", or "convolutional".
+                    <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+                        <p style="font-size: 1.05rem; font-weight: 700; color: var(--text-main);">No matching research papers found.</p>
+                        <p style="font-size: 0.88rem; margin-top: 0.35rem;">
+                            Try broader terms like "attention", "transformer", "neural", or "diffusion".
                         </p>
                     </div>
                 `;
@@ -238,26 +266,35 @@ function initHeroSearchForm() {
                 <div class="paper-item">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
                         <a href="viewer.html?id=${item.document_id}" class="paper-item-title">
-                            📄 ${escapeHtml(item.title)}
+                            ${escapeHtml(item.title)}
                         </a>
-                        <span class="score-badge">Relevance: ${item.score} ${item.relevance_percentage ? `(${item.relevance_percentage})` : ''}</span>
+                        <span class="score-badge">${item.relevance_percentage || `${Math.round(item.score * 100)}%`} Match</span>
                     </div>
 
                     <div class="paper-meta">
-                        <span>✍️ ${escapeHtml(item.authors || "Authors not specified")}</span>
-                        <span>📑 ${item.total_pages} Pages</span>
-                        <span>🕒 ${formatDate(item.uploaded_at)}</span>
+                        <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            ${escapeHtml(item.authors || "Authors not specified")}
+                        </span>
+                        <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                            ${item.total_pages} Pages
+                        </span>
+                        <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            ${formatDate(item.uploaded_at)}
+                        </span>
                     </div>
 
                     ${item.snippet ? `
                         <div class="paper-snippet">
-                            "...${escapeHtml(item.snippet)}..."
+                            "${escapeHtml(item.snippet)}"
                         </div>
                     ` : ""}
 
                     ${item.matched_keywords && item.matched_keywords.length > 0 ? `
                         <div class="tag-list">
-                            ${item.matched_keywords.map(k => `<span class="tag">✓ ${escapeHtml(k)}</span>`).join("")}
+                            ${item.matched_keywords.map(k => `<span class="tag">${escapeHtml(k)}</span>`).join("")}
                         </div>
                     ` : ""}
                 </div>
@@ -268,7 +305,7 @@ function initHeroSearchForm() {
 
         } catch (error) {
             papersContainer.innerHTML = `
-                <div style="text-align: center; padding: 1.5rem; color: var(--danger);">
+                <div style="text-align: center; padding: 2rem; color: var(--danger);">
                     <p>Failed to execute search. Ensure the backend server is running.</p>
                 </div>
             `;

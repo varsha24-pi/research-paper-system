@@ -6,7 +6,6 @@
     <title>Search Papers - PaperIntel AI</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Dedicated styles for search page */
         .search-page-header {
             text-align: center;
             margin-bottom: 2rem;
@@ -16,39 +15,8 @@
             font-size: 2rem;
             font-weight: 800;
             color: var(--text-main);
-            margin-bottom: 0.5rem;
-        }
-
-        .query-chips {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-top: 1rem;
-            align-items: center;
-        }
-
-        .chip-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .chip {
-            background-color: #f1f5f9;
-            color: var(--secondary);
-            border: 1px solid var(--border-color);
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .chip:hover {
-            background-color: var(--primary-light);
-            color: var(--primary);
-            border-color: #bfdbfe;
+            margin-bottom: 0.35rem;
+            letter-spacing: -0.025em;
         }
 
         .results-meta-bar {
@@ -58,7 +26,7 @@
             margin-bottom: 1.25rem;
             padding-bottom: 0.75rem;
             border-bottom: 1px solid var(--border-color);
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             color: var(--text-muted);
         }
 
@@ -73,17 +41,17 @@
         .search-card {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 1.5rem;
-            margin-bottom: 1.25rem;
-            box-shadow: var(--shadow-sm);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 1.65rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-card);
             transition: all 0.2s ease;
         }
 
         .search-card:hover {
-            border-color: #93c5fd;
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
+            border-color: #cbd5e1;
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-1px);
         }
 
         .search-card-header {
@@ -91,14 +59,15 @@
             justify-content: space-between;
             align-items: flex-start;
             gap: 1rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.45rem;
         }
 
         .search-card-title {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 700;
             color: var(--text-main);
             text-decoration: none;
+            line-height: 1.4;
         }
 
         .search-card-title:hover {
@@ -106,13 +75,13 @@
         }
 
         .search-card-snippet {
-            font-size: 0.92rem;
-            color: #334155;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
             background-color: #f8fafc;
             border-left: 3px solid var(--primary);
             padding: 0.75rem 1rem;
             border-radius: var(--radius-sm);
-            margin: 0.85rem 0;
+            margin: 0.75rem 0;
             line-height: 1.6;
         }
 
@@ -122,15 +91,9 @@
             align-items: center;
             margin-top: 1rem;
             padding-top: 0.75rem;
-            border-top: 1px solid #f1f5f9;
+            border-top: 1px solid var(--border-subtle);
             flex-wrap: wrap;
             gap: 0.75rem;
-        }
-
-        .loading-spinner {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-muted);
         }
 
         .empty-results-box {
@@ -141,19 +104,40 @@
             border-radius: var(--radius-lg);
             color: var(--text-muted);
         }
+
+        .empty-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background-color: var(--bg-subtle);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .empty-icon-box svg {
+            width: 24px;
+            height: 24px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- =======================================================================
-         1. Header & Navigation Bar
-         ======================================================================= -->
+    <!-- Header Navigation -->
     <header class="navbar">
         <a href="index.html" class="brand-container">
-            <span class="brand-logo">📚</span>
+            <div class="brand-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                    <path d="M6 6h10"></path>
+                    <path d="M6 10h10"></path>
+                </svg>
+            </div>
             <div>
-                <span class="brand-title">PaperIntel AI</span>
-                <span class="brand-subtitle">Research Paper Intelligence System</span>
+                <span class="brand-title">PaperIntel <span>AI</span></span>
+                <span class="brand-subtitle">Research Intelligence Platform</span>
             </div>
         </a>
 
@@ -175,86 +159,92 @@
         </div>
     </header>
 
-    <!-- =======================================================================
-         2. Main Content: Search Section
-         ======================================================================= -->
+    <!-- Main Content -->
     <main class="main-content">
         <div class="breadcrumb-nav">
-            <a href="dashboard.html">← Back to Dashboard</a>
+            <a href="dashboard.html">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Dashboard
+            </a>
+            <span>/</span>
+            <span>Intelligent Search</span>
         </div>
 
         <section class="search-page-header">
-            <h1>🔍 Intelligent Research Paper Search</h1>
-            <p style="color: var(--text-muted); font-size: 1rem; max-width: 650px; margin: 0 auto;">
-                Search across paper titles, abstracts, structural sections, and extracted NLP keywords with transparent relevance ranking.
+            <h1>Intelligent Research Paper Search</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 600px; margin: 0 auto;">
+                Search across titles, abstracts, sections, and keywords with statistical cosine similarity ranking.
             </p>
 
             <!-- Search Form -->
-            <div class="search-box-container" style="margin-top: 1.5rem; margin-bottom: 1rem;">
+            <div class="search-box-container" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">
                 <form id="search-page-form" class="search-form">
+                    <div class="search-icon-inline">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
                     <input 
                         type="text" 
                         id="search-query-input" 
                         class="search-input" 
-                        placeholder="Search by keywords, topics, or methodology (e.g. 'transformer', 'attention mechanism')..."
+                        placeholder="Search by keywords, methodologies, topics (e.g., 'attention mechanism', 'neural networks')..."
                         required
                         autofocus
                     />
                     <button type="submit" class="search-btn">
-                        <span>🔍 Search</span>
+                        Search
                     </button>
                 </form>
 
-                <!-- Quick Query Suggestions Chips -->
+                <!-- Query Suggestions -->
                 <div class="query-chips">
-                    <span class="chip-label">Try searching:</span>
+                    <span class="chip-label">Suggestions:</span>
                     <button type="button" class="chip" data-query="attention">attention</button>
                     <button type="button" class="chip" data-query="transformer networks">transformer networks</button>
                     <button type="button" class="chip" data-query="neural network">neural network</button>
-                    <button type="button" class="chip" data-query="convolutional vision">convolutional vision</button>
+                    <button type="button" class="chip" data-query="echo state">echo state networks</button>
                     <button type="button" class="chip" data-query="deep learning">deep learning</button>
                 </div>
             </div>
         </section>
 
-        <!-- ===================================================================
-             3. Search Results Display Section
-             =================================================================== -->
+        <!-- Search Results Section -->
         <section id="search-results-section" style="max-width: 900px; margin: 0 auto;">
-            <!-- Results Meta Info (Count, Query, Latency) -->
             <div id="results-meta-bar" class="results-meta-bar" style="display: none;">
                 <span id="results-count-text">Found 0 results</span>
-                <span id="query-tokens-text" style="font-size: 0.82rem;"></span>
+                <span id="query-tokens-text" style="font-size: 0.8rem;"></span>
             </div>
 
-            <!-- Results Cards Container -->
+            <!-- Results Container -->
             <div id="results-container">
                 <div class="empty-results-box">
-                    <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">🔎</span>
-                    <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">
+                    <div class="empty-icon-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;">
                         Ready to search research papers
                     </h3>
-                    <p style="font-size: 0.95rem; max-width: 500px; margin: 0 auto 1.25rem;">
-                        Enter any keyword, research topic, or author name above, or click one of the suggestion chips to start searching.
+                    <p style="font-size: 0.9rem; max-width: 480px; margin: 0 auto 1rem;">
+                        Enter any keyword or research topic above to retrieve relevance-ranked academic papers.
                     </p>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- =======================================================================
-         4. Footer
-         ======================================================================= -->
     <footer class="footer">
         <p>AI-Powered Research Paper Intelligence System • College Minor Project</p>
     </footer>
 
-    <!-- Client Script -->
     <script src="js/app.js"></script>
     <script>
-        // =====================================================================
-        // Search Page Interactive Logic (Vanilla JavaScript)
-        // =====================================================================
         document.addEventListener("DOMContentLoaded", () => {
             const form = document.getElementById("search-page-form");
             const input = document.getElementById("search-query-input");
@@ -264,7 +254,6 @@
             const tokensText = document.getElementById("query-tokens-text");
             const chips = document.querySelectorAll(".chip");
 
-            // Check if URL has ?q= query parameter (e.g. from homepage search)
             const urlParams = new URLSearchParams(window.location.search);
             const initialQuery = urlParams.get("q") || urlParams.get("query");
             if (initialQuery) {
@@ -272,7 +261,6 @@
                 executeSearch(initialQuery);
             }
 
-            // Suggestion chips click handler
             chips.forEach(chip => {
                 chip.addEventListener("click", () => {
                     const q = chip.getAttribute("data-query");
@@ -281,7 +269,6 @@
                 });
             });
 
-            // Form submit handler
             form.addEventListener("submit", (e) => {
                 e.preventDefault();
                 const q = input.value.trim();
@@ -290,19 +277,14 @@
                 }
             });
 
-            // =================================================================
-            // Execute Search via fetch() -> GET /search/?q=...
-            // =================================================================
             async function executeSearch(query) {
-                // Update browser URL without reloading
                 const newUrl = `${window.location.pathname}?q=${encodeURIComponent(query)}`;
                 window.history.replaceState({ path: newUrl }, "", newUrl);
 
                 metaBar.style.display = "none";
                 resultsContainer.innerHTML = `
-                    <div class="loading-spinner">
-                        <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">⏳</span>
-                        <p>Searching research paper index and calculating relevance scores...</p>
+                    <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+                        <p style="font-size: 0.95rem;">Searching research paper index and calculating relevance...</p>
                     </div>
                 `;
 
@@ -320,38 +302,32 @@
                     const results = data.results || [];
                     const tokens = data.query_tokens || [];
 
-                    // Render Meta Bar
                     metaBar.style.display = "flex";
                     countText.textContent = `Found ${results.length} result(s) in ${durationMs}ms`;
                     tokensText.innerHTML = tokens.length > 0
-                        ? `Filtered query tokens: <code>${tokens.map(escapeHtml).join(", ")}</code>`
+                        ? `Query tokens: <code>${tokens.map(escapeHtml).join(", ")}</code>`
                         : "";
 
-                    // Zero Results Found State
                     if (results.length === 0) {
                         resultsContainer.innerHTML = `
                             <div class="empty-results-box">
-                                <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">📭</span>
-                                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">
+                                <div class="empty-icon-box">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                                    </svg>
+                                </div>
+                                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;">
                                     No matching research papers found
                                 </h3>
-                                <p style="font-size: 0.95rem; margin-bottom: 1.25rem;">
-                                    We couldn't find any documents matching <strong>"${escapeHtml(query)}"</strong>.
+                                <p style="font-size: 0.9rem; margin-bottom: 1rem;">
+                                    No documents matched <strong>"${escapeHtml(query)}"</strong>. Try broader keywords like "neural", "vision", or "model".
                                 </p>
-                                <div style="font-size: 0.85rem; color: var(--text-muted); text-align: left; max-width: 400px; margin: 0 auto; background: #f8fafc; padding: 1rem; border-radius: var(--radius-sm);">
-                                    <strong>Suggestions:</strong>
-                                    <ul style="margin-left: 1.2rem; margin-top: 0.35rem;">
-                                        <li>Check your search term for typos.</li>
-                                        <li>Try broader keywords (e.g. "neural", "vision", "model").</li>
-                                        <li>Ensure papers have been uploaded into the system.</li>
-                                    </ul>
-                                </div>
                             </div>
                         `;
                         return;
                     }
 
-                    // Render Result Cards
                     resultsContainer.innerHTML = results.map(item => {
                         const highlightedSnippet = highlightText(item.snippet, tokens);
 
@@ -359,18 +335,27 @@
                             <div class="search-card">
                                 <div class="search-card-header">
                                     <a href="viewer.html?id=${item.document_id}" class="search-card-title">
-                                        📄 ${escapeHtml(item.title)}
+                                        ${escapeHtml(item.title)}
                                     </a>
-                                    <span class="score-badge" title="Multi-field relevance score">
-                                        ⭐ Relevance: ${item.score}
+                                    <span class="score-badge">
+                                        ${item.relevance_percentage || (Math.round(item.score * 100) + '% Match')}
                                     </span>
                                 </div>
 
                                 <div class="paper-meta">
-                                    <span>✍️ ${escapeHtml(item.authors || "Authors not specified")}</span>
-                                    <span>📑 ${item.total_pages} Page(s)</span>
-                                    ${item.publication_year ? `<span>📅 Year: ${item.publication_year}</span>` : ""}
-                                    <span>🕒 Uploaded: ${formatDate(item.uploaded_at)}</span>
+                                    <span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                        ${escapeHtml(item.authors || "Authors not specified")}
+                                    </span>
+                                    <span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                        ${item.total_pages} Page(s)
+                                    </span>
+                                    ${item.publication_year ? `<span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${item.publication_year}</span>` : ""}
+                                    <span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        ${formatDate(item.uploaded_at)}
+                                    </span>
                                 </div>
 
                                 ${item.snippet ? `
@@ -382,11 +367,11 @@
                                 <div class="search-card-actions">
                                     <div class="tag-list">
                                         ${item.matched_keywords && item.matched_keywords.length > 0 ? (
-                                            item.matched_keywords.map(k => `<span class="tag">✓ ${escapeHtml(k)}</span>`).join("")
-                                        ) : `<span style="font-size: 0.8rem; color: var(--text-muted);">Title / Body Match</span>`}
+                                            item.matched_keywords.map(k => `<span class="tag">${escapeHtml(k)}</span>`).join("")
+                                        ) : `<span style="font-size: 0.78rem; color: var(--text-muted);">Composite match</span>`}
                                     </div>
 
-                                    <a href="viewer.html?id=${item.document_id}" class="btn btn-primary" style="padding: 0.45rem 1rem; font-size: 0.85rem;">
+                                    <a href="viewer.html?id=${item.document_id}" class="btn btn-primary" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">
                                         View Structured Paper →
                                     </a>
                                 </div>
@@ -399,15 +384,11 @@
                     resultsContainer.innerHTML = `
                         <div class="alert alert-error" style="display: block;">
                             <p><strong>Search Error:</strong> ${escapeHtml(error.message)}</p>
-                            <p style="font-size: 0.85rem; margin-top: 0.25rem;">
-                                Please ensure the FastAPI backend is running at <code>http://127.0.0.1:8000</code>.
-                            </p>
                         </div>
                     `;
                 }
             }
 
-            // Helper to highlight matching tokens in snippet
             function highlightText(text, tokens) {
                 if (!text || !tokens || tokens.length === 0) return escapeHtml(text);
                 let escaped = escapeHtml(text);

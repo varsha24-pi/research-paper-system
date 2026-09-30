@@ -12,73 +12,118 @@
             align-items: center;
             margin-bottom: 2rem;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 1.25rem;
+        }
+
+        .filter-search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-search-wrapper svg {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-muted);
+            pointer-events: none;
         }
 
         .library-search-input {
-            padding: 0.65rem 1rem;
+            padding: 0.65rem 1rem 0.65rem 2.5rem;
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
+            border-radius: var(--radius-md);
+            font-size: 0.92rem;
             width: 320px;
+            background: #ffffff;
+            color: var(--text-main);
             outline: none;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         .library-search-input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
 
         .paper-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 1.5rem;
-            margin-bottom: 3rem;
+            margin-bottom: 3.5rem;
         }
 
         .library-card {
-            background: white;
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-lg);
             padding: 1.5rem;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-card);
             transition: all 0.2s ease;
         }
 
         .library-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-            border-color: #93c5fd;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            border-color: #cbd5e1;
         }
 
         .library-card-title {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--text-main);
             text-decoration: none;
-            line-height: 1.4;
-            margin-bottom: 0.5rem;
-            display: block;
+            line-height: 1.45;
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .library-card-title:hover {
             color: var(--primary);
         }
+
+        .library-card-footer {
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 1rem;
+            margin-top: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .doc-id-pill {
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            color: var(--text-muted);
+            background: #f1f5f9;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Header Navigation -->
+    <!-- =======================================================================
+         1. Header & Navigation Bar
+         ======================================================================= -->
     <header class="navbar">
         <a href="index.html" class="brand-container">
-            <span class="brand-logo">📚</span>
+            <div class="brand-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                    <path d="M6 6h10"></path>
+                    <path d="M6 10h10"></path>
+                </svg>
+            </div>
             <div>
-                <span class="brand-title">PaperIntel AI</span>
-                <span class="brand-subtitle">Research Paper Intelligence System</span>
+                <span class="brand-title">PaperIntel <span>AI</span></span>
+                <span class="brand-subtitle">Research Intelligence Platform</span>
             </div>
         </a>
 
@@ -100,44 +145,71 @@
         </div>
     </header>
 
+    <!-- =======================================================================
+         2. Main Content
+         ======================================================================= -->
     <main class="main-content">
         <div class="breadcrumb-nav">
-            <a href="index.html">← Back to Home</a>
+            <a href="index.html">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m15 18-6-6 6-6"></path>
+                </svg>
+                Back to Home
+            </a>
         </div>
 
         <div class="library-header">
             <div>
-                <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-main);">
-                    📚 Ingested Research Paper Library
+                <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em;">
+                    Research Paper Library
                 </h1>
                 <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">
-                    Browse and inspect all structured research papers currently indexed in MySQL.
+                    Browse and inspect all structured research papers currently indexed in the system.
                 </p>
             </div>
 
-            <div style="display: flex; gap: 0.75rem; align-items: center;">
-                <input 
-                    type="text" 
-                    id="library-filter" 
-                    class="library-search-input" 
-                    placeholder="Filter papers by title, author, keyword..."
-                />
-                <a href="upload.html" class="btn btn-primary" style="white-space: nowrap;">
-                    + Upload Paper
+            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                <div class="filter-search-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.3-4.3"></path>
+                    </svg>
+                    <input 
+                        type="text" 
+                        id="library-filter" 
+                        class="library-search-input" 
+                        placeholder="Filter by title, author, keyword..."
+                    />
+                </div>
+                <a href="upload.html" class="btn btn-primary" style="white-space: nowrap; display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"></path>
+                        <path d="M12 5v14"></path>
+                    </svg>
+                    Upload Paper
                 </a>
             </div>
         </div>
 
         <!-- Library Container -->
         <div id="library-loading" style="text-align: center; padding: 4rem 1rem;">
-            <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">⏳</span>
-            <p style="color: var(--text-muted);">Loading research papers from database...</p>
+            <div style="display: inline-block; width: 36px; height: 36px; border: 3px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem;"></div>
+            <style>
+                @keyframes spin { to { transform: rotate(360deg); } }
+            </style>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Loading research papers from database...</p>
         </div>
 
-        <div id="library-empty" class="alert alert-info" style="display: none; text-align: center; padding: 3rem 1.5rem;">
-            <h3>📂 No research papers found</h3>
-            <p style="margin-top: 0.5rem;">Upload your first research paper PDF to begin building your intelligence library.</p>
-            <div style="margin-top: 1rem;">
+        <div id="library-empty" class="alert alert-info" style="display: none; text-align: center; padding: 3rem 1.5rem; border-radius: var(--radius-lg);">
+            <div style="width: 48px; height: 48px; margin: 0 auto 1rem; border-radius: 50%; background: var(--primary-subtle); color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+            </div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">No research papers found</h3>
+            <p style="margin-top: 0.5rem; color: var(--text-secondary); max-width: 480px; margin-left: auto; margin-right: auto;">Upload your first research paper PDF to begin building your intelligence corpus.</p>
+            <div style="margin-top: 1.25rem;">
                 <a href="upload.html" class="btn btn-primary">Upload PDF Paper Now</a>
             </div>
         </div>
@@ -145,6 +217,9 @@
         <div id="papers-grid" class="paper-grid" style="display: none;"></div>
     </main>
 
+    <!-- =======================================================================
+         3. Footer
+         ======================================================================= -->
     <footer class="footer">
         <p>AI-Powered Research Paper Intelligence System • College Minor Project</p>
     </footer>
@@ -196,10 +271,11 @@
             } catch (err) {
                 loading.style.display = "none";
                 emptyBox.style.display = "block";
+                emptyBox.className = "alert alert-error";
                 emptyBox.innerHTML = `
-                    <div style="color: var(--danger);">
-                        <p><strong>⚠️ Unable to connect to backend server.</strong></p>
-                        <p style="font-size: 0.85rem; margin-top: 0.35rem;">
+                    <div style="text-align: center;">
+                        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--danger); margin-bottom: 0.5rem;">Unable to connect to backend server</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">
                             Ensure your FastAPI backend is running at <code>http://127.0.0.1:8000</code>.
                         </p>
                     </div>
@@ -210,7 +286,7 @@
         function renderPapers(papers) {
             const grid = document.getElementById("papers-grid");
             if (papers.length === 0) {
-                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">No papers matched your filter query.</p>`;
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem 1rem;">No papers matched your filter query.</p>`;
                 return;
             }
 
@@ -218,26 +294,39 @@
                 <div class="library-card">
                     <div>
                         <a href="viewer.html?id=${p.id}" class="library-card-title">
-                            📄 ${escapeHtml(p.title || p.filename)}
+                            ${escapeHtml(p.title || p.filename)}
                         </a>
                         <div class="paper-meta" style="margin-bottom: 0.75rem;">
-                            <span>✍️ ${escapeHtml(p.authors || "Authors not specified")}</span>
+                            <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                ${escapeHtml(p.authors || "Authors not specified")}
+                            </span>
                         </div>
-                        <div class="paper-meta" style="margin-bottom: 1rem;">
-                            <span>📑 ${p.total_pages || 1} Pages</span>
-                            <span>📦 ${formatBytes(p.file_size_bytes || 0)}</span>
-                            <span>🕒 ${formatDate(p.uploaded_at)}</span>
+                        <div class="paper-meta" style="margin-bottom: 1rem; gap: 0.85rem;">
+                            <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                ${p.total_pages || 1} Pages
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                                ${formatBytes(p.file_size_bytes || 0)}
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                ${formatDate(p.uploaded_at)}
+                            </span>
                         </div>
                         ${p.keywords && p.keywords.length > 0 ? `
-                            <div class="tag-list" style="margin-bottom: 1rem;">
-                                ${p.keywords.slice(0, 4).map(k => `<span class="tag">🏷️ ${escapeHtml(k)}</span>`).join("")}
+                            <div class="tag-list" style="margin-bottom: 0.5rem;">
+                                ${p.keywords.slice(0, 4).map(k => `<span class="tag">${escapeHtml(k)}</span>`).join("")}
                             </div>
                         ` : ""}
                     </div>
-                    <div style="border-top: 1px solid #f1f5f9; padding-top: 1rem; margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.82rem; color: var(--text-muted);">ID #${p.id}</span>
-                        <a href="viewer.html?id=${p.id}" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.4rem 0.85rem;">
-                            View Details →
+                    <div class="library-card-footer">
+                        <span class="doc-id-pill">DOC #${p.id}</span>
+                        <a href="viewer.html?id=${p.id}" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.4rem 0.85rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+                            View Details
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
                         </a>
                     </div>
                 </div>
